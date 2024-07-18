@@ -958,7 +958,7 @@ func TestSprintHeaderJSONDiff(t *testing.T) {
 				"Etag": "W/\"1c0-8j/k9MOCbWGtKgVesjFGmY6dEAs\"",
 				"Vary": "Origin",
 			},
-			name: "random key change in deeply nested mixed structures",
+			name: "Changing the header",
 		},
 	}
 
