@@ -19,11 +19,11 @@ type Range struct {
 }
 
 // SprintJSONDiff compares two JSON objects and returns the differences as colorized strings.
-func SprintJSONDiff(json1 []byte, json2 []byte, field string, noise map[string][]string) (string, string) {
+func SprintJSONDiff(json1 []byte, json2 []byte, noise map[string][]string) (error, string, string) {
 	// Calculate the differences between the two JSON objects.
 	diffString, err := calculateJSONDiffs(json1, json2)
 	if err != nil || diffString == "" {
-		return "", ""
+		return err, "", ""
 	}
 
 	// Extract the modified keys from the diff string.
@@ -38,11 +38,11 @@ func SprintJSONDiff(json1 []byte, json2 []byte, field string, noise map[string][
 	// Separate and colorize the diff string into expected and actual outputs.
 	expect, actual := separateAndColorize(diffString, noise)
 
-	return expect, actual
+	return nil, expect, actual
 }
 
 // SprintDiff takes expected and actual JSON strings and returns the colorized differences.
-func SprintDiff(expect, actual, field string) (string, string) {
+func SprintDiff(expect, actual string) (string, string) {
 	// Calculate the ranges for differences between the expected and actual JSON strings.
 	offsetExpect, offsetActual, _ := diffArrayRange(expect, actual)
 
