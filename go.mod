@@ -1,6 +1,6 @@
 module go.keploy.io/jsondiff
 
-go 1.22.1
+go 1.22.0
 
 require (
 	github.com/fatih/color v1.17.0 // indirect
