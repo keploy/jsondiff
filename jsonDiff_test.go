@@ -911,14 +911,14 @@ func TestSprintJSONDiff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err, a, b := SprintJSONDiff([]byte(tt.json1), []byte(tt.json2), map[string][]string{})
+			resp, err := ColorJSONDiff([]byte(tt.json1), []byte(tt.json2), map[string][]string{})
 			if err != nil {
 				fmt.Println(err.Error())
 				t.Fail()
 			}
-			result := expectActualTable(a, b, "", false)
-			escapedA := escapedANSIString(a)
-			escapedB := escapedANSIString(b)
+			result := expectActualTable(resp.ExpectedResponse, resp.ActualResponse, "", false)
+			escapedA := escapedANSIString(resp.ExpectedResponse)
+			escapedB := escapedANSIString(resp.ActualResponse)
 			if !containsSubstring(tt.expectedStringA, escapedA) {
 				println(result)
 				println(tt.name)
@@ -964,10 +964,10 @@ func TestSprintHeaderJSONDiff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a, b := SprintDiffHeader(tt.json1, (tt.json2))
-			result := expectActualTable(a, b, "", false)
-			escapedA := escapedANSIString(a)
-			escapedB := escapedANSIString(b)
+			resp := ColorHeaderDiff(tt.json1, (tt.json2))
+			result := expectActualTable(resp.ExpectedResponse, resp.ActualResponse, "", false)
+			escapedA := escapedANSIString(resp.ExpectedResponse)
+			escapedB := escapedANSIString(resp.ActualResponse)
 			if !containsSubstring(tt.expectedStringA, escapedA) {
 				println(result)
 				println(tt.name)
@@ -1011,8 +1011,8 @@ func expectActualTable(exp string, act string, field string, centerize bool) str
 	table.SetHeader([]string{fmt.Sprintf("Expect %v", field), fmt.Sprintf("Actual %v", field)})
 	table.SetAutoWrapText(false)
 	table.SetBorder(false)
-	table.SetColMinWidth(0, MAX_LINE_LENGTH)
-	table.SetColMinWidth(1, MAX_LINE_LENGTH)
+	table.SetColMinWidth(0, max_line_length)
+	table.SetColMinWidth(1, max_line_length)
 	table.Append([]string{exp, act})
 	table.Render()
 	return buf.String()

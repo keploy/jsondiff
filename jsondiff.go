@@ -13,17 +13,30 @@ import (
 )
 
 // Range represents a range with a start and end index.
-type Range struct {
+type colorRange struct {
 	Start int // Start is the starting index of the range.
 	End   int // End is the ending index of the range.
 }
 
-// SprintJSONDiff compares two JSON objects and returns the differences as colorized strings.
-func SprintJSONDiff(json1 []byte, json2 []byte, noise map[string][]string) (error, string, string) {
+// ColorizedResponse holds the colorized differences between the expected and actual JSON responses.
+// ExpectedResponse: The colorized string representing the differences in the expected JSON response.
+// ActualResponse: The colorized string representing the differences in the actual JSON response.
+type ColorisedResponse struct {
+	ExpectedResponse string
+	ActualResponse   string
+}
+
+// ColorJSONDiff compares two JSON objects and returns the differences as colorized strings.
+// json1: The first JSON object to compare.
+// json2: The second JSON object to compare.
+// noise: A map containing fields to ignore during the comparison.
+// Returns a ColorizedResponse containing the colorized differences for the expected and actual JSON responses.
+func ColorJSONDiff(json1 []byte, json2 []byte, noise map[string][]string) (ColorisedResponse, error) {
+	colorisedResponse := ColorisedResponse{}
 	// Calculate the differences between the two JSON objects.
 	diffString, err := calculateJSONDiffs(json1, json2)
 	if err != nil || diffString == "" {
-		return err, "", ""
+		return colorisedResponse, err
 	}
 
 	// Extract the modified keys from the diff string.
@@ -38,11 +51,17 @@ func SprintJSONDiff(json1 []byte, json2 []byte, noise map[string][]string) (erro
 	// Separate and colorize the diff string into expected and actual outputs.
 	expect, actual := separateAndColorize(diffString, noise)
 
-	return nil, expect, actual
+	return ColorisedResponse{
+		ExpectedResponse: expect,
+		ActualResponse:   actual,
+	}, nil
 }
 
-// SprintDiff takes expected and actual JSON strings and returns the colorized differences.
-func SprintDiff(expect, actual string) (string, string) {
+// ColorDiff takes expected and actual JSON strings and returns the colorized differences.
+// expect: The JSON string containing the expected values.
+// actual: The JSON string containing the actual values.
+// Returns a ColorizedResponse containing the colorized differences for the expected and actual JSON responses.
+func ColorDiff(expect, actual string) ColorisedResponse {
 	// Calculate the ranges for differences between the expected and actual JSON strings.
 	offsetExpect, offsetActual, _ := diffArrayRange(expect, actual)
 
@@ -54,7 +73,7 @@ func SprintDiff(expect, actual string) (string, string) {
 	// Colorize the differences in the expected and actual JSON strings.
 	exp += breakSliceWithColor(expect, &cE, offsetExpect)
 	act += breakSliceWithColor(actual, &cA, offsetActual)
-	return exp, act
+	return ColorisedResponse{ExpectedResponse: exp, ActualResponse: act}
 }
 
 // checkKeyInMaps checks if the given key exists in both JSON maps and returns additional context if found.
@@ -442,10 +461,10 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				if strings.Contains(line, e) {
 					if line[0] == '-' {
 						line = " " + line[1:]
-						expect += breakWithColor(line, nil, []Range{})
+						expect += breakWithColor(line, nil, []colorRange{})
 					} else if line[0] == '+' {
 						line = " " + line[1:]
-						actual += breakWithColor(line, nil, []Range{})
+						actual += breakWithColor(line, nil, []colorRange{})
 					}
 					noised = true
 				}
@@ -462,7 +481,7 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 					offsets, _ := diffIndexRange(line[1:], diffLines[i+1][1:])
 					expect += breakWithColor(line, &c, offsets)
 				} else {
-					expect += breakWithColor(line, &c, []Range{{Start: 0, End: len(line) - 1}})
+					expect += breakWithColor(line, &c, []colorRange{{Start: 0, End: len(line) - 1}})
 				}
 			} else if line[0] == '+' { // Process lines that start with '+' indicating actual differences.
 				c := color.FgGreen
@@ -470,11 +489,11 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 					offsets, _ := diffIndexRange(line[1:], diffLines[i-1][1:])
 					actual += breakWithColor(line, &c, offsets)
 				} else {
-					actual += breakWithColor(line, &c, []Range{{Start: 0, End: len(line) - 1}})
+					actual += breakWithColor(line, &c, []colorRange{{Start: 0, End: len(line) - 1}})
 				}
 			} else { // Process lines that do not start with '-' or '+'.
-				expect += breakWithColor(line, nil, []Range{})
-				actual += breakWithColor(line, nil, []Range{})
+				expect += breakWithColor(line, nil, []colorRange{})
+				actual += breakWithColor(line, nil, []colorRange{})
 			}
 		}
 	}
@@ -487,7 +506,7 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 // input: The string to be processed.
 // c: The color attribute to apply to the specified ranges. If nil, no color is applied.
 // highlightRanges: A slice of Range structs specifying the start and end indices for color application.
-func breakWithColor(input string, c *color.Attribute, highlightRanges []Range) string {
+func breakWithColor(input string, c *color.Attribute, highlightRanges []colorRange) string {
 	// Default paint function does nothing.
 	paint := func(_ ...interface{}) string { return "" }
 	// If a color attribute is provided, update the paint function to apply that color.
@@ -519,7 +538,7 @@ func breakWithColor(input string, c *color.Attribute, highlightRanges []Range) s
 
 		lineLen++
 		// Break the line if it reaches the maximum line length.
-		if lineLen == MAX_LINE_LENGTH {
+		if lineLen == max_line_length {
 			output.WriteString("\n")
 			lineLen = 0
 		}
@@ -538,7 +557,8 @@ func isControlCharacter(char rune) bool {
 	return char < ' '
 }
 
-const MAX_LINE_LENGTH = 50
+// maxLineLength is the maximum length of a line before it is wrapped.
+const max_line_length = 50
 
 // breakLines breaks the input string into lines of a specified maximum length.
 // input: The string to be processed and broken into lines.
@@ -567,7 +587,7 @@ func breakLines(input string) string {
 			if isControlCharacter(char) && char != '\n' {
 				currentLine.WriteRune(char) // Add control characters directly to the current line.
 			} else {
-				if lineLength >= MAX_LINE_LENGTH {
+				if lineLength >= max_line_length {
 					output.WriteString(currentLine.String()) // Add the current line to the output.
 					output.WriteRune('\n')                   // Add a newline character.
 					currentLine.Reset()                      // Reset the current line builder.
@@ -755,11 +775,11 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 	return expectedOutput.String(), actualOutput.String()
 }
 
-// SprintDiffHeader compares the headers of the expected and actual maps and returns the differences as colorized strings.
+// ColorHeaderDiff compares the headers of the expected and actual maps and returns the differences as colorized strings.
 // expect: The map containing the expected header values.
 // actual: The map containing the actual header values.
-// Returns two strings: the colorized differences for the expected and actual headers.
-func SprintDiffHeader(expect, actual map[string]string) (string, string) {
+// Returns a ColorizedResponse containing the colorized differences for the expected and actual headers.
+func ColorHeaderDiff(expect, actual map[string]string) ColorisedResponse {
 	var expectAll, actualAll strings.Builder // Builders for the resulting strings.
 
 	// Iterate over each key-value pair in the expected map.
@@ -782,7 +802,7 @@ func SprintDiffHeader(expect, actual map[string]string) (string, string) {
 	}
 
 	// Return the resulting strings.
-	return expectAll.String(), actualAll.String()
+	return ColorisedResponse{ExpectedResponse: expectAll.String(), ActualResponse: actualAll.String()}
 }
 
 // breakSliceWithColor breaks the input string into slices and applies color to specified offsets.
@@ -825,9 +845,9 @@ func contains(slice []int, element int) bool {
 
 // diffIndexRange calculates the ranges of differences between two strings of words.
 // It returns a slice of Range structs indicating the start and end indices of differences and a boolean indicating if there are differences.
-func diffIndexRange(s1, s2 string) ([]Range, bool) {
-	var ranges []Range // Slice to hold the ranges of differences.
-	diff := false      // Boolean to track if there are any differences.
+func diffIndexRange(s1, s2 string) ([]colorRange, bool) {
+	var ranges []colorRange // Slice to hold the ranges of differences.
+	diff := false           // Boolean to track if there are any differences.
 
 	// Split the input strings into slices of words.
 	words1 := strings.Split(s1, " ")
@@ -862,7 +882,7 @@ func diffIndexRange(s1, s2 string) ([]Range, bool) {
 			// Calculate the end index for the current range.
 			endIndex := startIndex + len(word1)
 			// Append the range of the differing words to the ranges slice.
-			ranges = append(ranges, Range{Start: startIndex, End: endIndex - 1})
+			ranges = append(ranges, colorRange{Start: startIndex, End: endIndex - 1})
 		}
 		// Update the starting index for the next word.
 		startIndex += len(word1) + 1
