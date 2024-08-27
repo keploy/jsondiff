@@ -1,6 +1,7 @@
-package jsonDiff
+package colorisediff
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
@@ -911,15 +912,15 @@ func TestSprintJSONDiff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resp, err := ColorJSONDiff([]byte(tt.json1), []byte(tt.json2), map[string][]string{})
+			resp, err := CompareJSON([]byte(tt.json1), []byte(tt.json2), map[string][]string{}, false)
 			if err != nil {
 				fmt.Println(err.Error())
 				t.Fail()
 			}
-			result := expectActualTable(resp.ExpectedResponse, resp.ActualResponse, "", false)
-			escapedA := escapedANSIString(resp.ExpectedResponse)
-			escapedB := escapedANSIString(resp.ActualResponse)
-			if !containsSubstring(tt.expectedStringA, escapedA) {
+			result := expectActualTable(resp.Expected, resp.Actual, "", false)
+			escapedA := escapedANSIString(resp.Expected)
+			escapedB := escapedANSIString(resp.Actual)
+			if !containsSubstring(tt.expectedStringA, escapedB) {
 				println(result)
 				println(tt.name)
 				fmt.Printf("\"%s %s\",\n", escapedA, "A")
@@ -964,10 +965,10 @@ func TestSprintHeaderJSONDiff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resp := ColorHeaderDiff(tt.json1, (tt.json2))
-			result := expectActualTable(resp.ExpectedResponse, resp.ActualResponse, "", false)
-			escapedA := escapedANSIString(resp.ExpectedResponse)
-			escapedB := escapedANSIString(resp.ActualResponse)
+			resp := CompareHeaders(tt.json1, (tt.json2))
+			result := expectActualTable(resp.Expected, resp.Actual, "", false)
+			escapedA := escapedANSIString(resp.Expected)
+			escapedB := escapedANSIString(resp.Actual)
 			if !containsSubstring(tt.expectedStringA, escapedA) {
 				println(result)
 				println(tt.name)
@@ -1025,4 +1026,51 @@ func containsSubstring(array []string, substring string) bool {
 		}
 	}
 	return false
+}
+
+// WrapTextWithAnsi processes the input string to ensure ANSI escape sequences are properly wrapped across lines.
+// input: The input string containing text and ANSI escape sequences.
+// Returns the processed string with properly wrapped ANSI escape sequences.
+func wrapTextWithAnsi(input string) string {
+	scanner := bufio.NewScanner(strings.NewReader(input)) // Create a scanner to read the input string line by line.
+	var wrappedBuilder strings.Builder                    // Builder for the resulting wrapped text.
+	currentAnsiCode := ""                                 // Variable to hold the current ANSI escape sequence.
+	lastAnsiCode := ""                                    // Variable to hold the last ANSI escape sequence.
+
+	// Iterate over each line in the input string.
+	for scanner.Scan() {
+		line := scanner.Text() // Get the current line.
+
+		// If there is a current ANSI code, append it to the builder.
+		if currentAnsiCode != "" {
+			wrappedBuilder.WriteString(currentAnsiCode)
+		}
+
+		// Find all ANSI escape sequences in the current line.
+		startAnsiCodes := ansiRegex.FindAllString(line, -1)
+		if len(startAnsiCodes) > 0 {
+			// Update the last ANSI escape sequence to the last one found in the line.
+			lastAnsiCode = startAnsiCodes[len(startAnsiCodes)-1]
+		}
+
+		// Append the current line to the builder.
+		wrappedBuilder.WriteString(line)
+
+		// Check if the current ANSI code needs to be reset or updated.
+		if (currentAnsiCode != "" && !strings.HasSuffix(line, ansiResetCode)) || len(startAnsiCodes) > 0 {
+			// If the current line does not end with a reset code or if there are ANSI codes, append a reset code.
+			wrappedBuilder.WriteString(ansiResetCode)
+			// Update the current ANSI code to the last one found in the line.
+			currentAnsiCode = lastAnsiCode
+		} else {
+			// If no ANSI codes need to be maintained, reset the current ANSI code.
+			currentAnsiCode = ""
+		}
+
+		// Append a newline character to the builder.
+		wrappedBuilder.WriteString("\n")
+	}
+
+	// Return the processed string with properly wrapped ANSI escape sequences.
+	return wrappedBuilder.String()
 }
