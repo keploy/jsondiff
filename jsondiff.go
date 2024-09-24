@@ -835,7 +835,6 @@ func diffIndexRange(str1, str2 string) ([]colorRange, bool) {
 			ranges = append(ranges, colorRange{Start: startIndex, End: endIndex})
 		case i < len(words2):
 			// Only the second string has a word at index i (i.e., words2 is longer).
-			word2 = words2[i]
 			hasDifference = true
 			// This case does not add ranges from words2 because we are only recording ranges from words1.
 		}
