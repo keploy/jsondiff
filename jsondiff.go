@@ -17,7 +17,7 @@ type colorRange struct {
 	End   int // End is the ending index of the range.
 }
 
-// ColorizedResponse holds the colorized differences between the expected and actual JSON responses.
+// Diff holds the colorized differences between the expected and actual JSON responses.
 // Expected: The colorized string representing the differences in the expected JSON response.
 // Actual: The colorized string representing the differences in the actual JSON response.
 type Diff struct {
@@ -30,25 +30,29 @@ type Diff struct {
 // json2: The second JSON object to compare.
 // noise: A map containing fields to ignore during the comparison.
 // Returns a ColorizedResponse containing the colorized differences for the expected and actual JSON responses.
-func CompareJSON(json1 []byte, json2 []byte, noise map[string][]string, disableColor bool) (Diff, error) {
+func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]string, disableColor bool) (Diff, error) {
 	color.NoColor = disableColor
-	colorisedResponse := Diff{}
 	// Calculate the differences between the two JSON objects.
-	diffString, err := calculateJSONDiffs(json1, json2)
+	diffString, err := calculateJSONDiffs(expectedJSON, actualJSON)
 	if err != nil || diffString == "" {
-		return colorisedResponse, err
+		return Diff{}, err
 	}
-
 	// Extract the modified keys from the diff string.
 	modifiedKeys := extractKey(diffString)
+
 	// Check if the modified keys exist in the provided maps and add additional context if they do.
-	additionalContext, exists := checkKeyInMaps(json1, json2, modifiedKeys)
+	contextInfo, exists, error := checkKeyInMaps(expectedJSON, actualJSON, modifiedKeys)
+
+	if error != nil {
+		return Diff{}, error
+	}
 
 	if exists {
-		diffString = additionalContext + "\n" + diffString
+		diffString = contextInfo + "\n" + diffString
 	}
 	// Separate and colorize the diff string into expected and actual outputs.
 	expect, actual := separateAndColorize(diffString, noise)
+
 	return Diff{
 		Expected: expect,
 		Actual:   actual,
@@ -56,111 +60,112 @@ func CompareJSON(json1 []byte, json2 []byte, noise map[string][]string, disableC
 }
 
 // Compare takes expected and actual JSON strings and returns the colorized differences.
-// expect: The JSON string containing the expected values.
-// actual: The JSON string containing the actual values.
-// Returns a ColorizedResponse containing the colorized differences for the expected and actual JSON responses.
-func Compare(expect, actual string) Diff {
+// expectedJSON: The JSON string containing the expected values.
+// actualJSON: The JSON string containing the actual values.
+// Returns a Diff struct containing the colorized differences for the expected and actual JSON responses.
+func Compare(expectedJSON, actualJSON string) Diff {
 	// Calculate the ranges for differences between the expected and actual JSON strings.
-	offsetExpect, offsetActual, _ := diffArrayRange(expect, actual)
+	offsetExpected, offsetActual, _ := diffArrayRange(expectedJSON, actualJSON)
 
 	// Define colors for highlighting differences.
-	cE, cA := color.FgHiRed, color.FgHiGreen
-
-	var exp, act string
+	highlightExpected := color.FgHiRed
+	highlightActual := color.FgHiGreen
 
 	// Colorize the differences in the expected and actual JSON strings.
-	exp += breakSliceWithColor(expect, &cE, offsetExpect)
-	act += breakSliceWithColor(actual, &cA, offsetActual)
-	return Diff{Expected: exp, Actual: act}
+	colorizedExpected := breakSliceWithColor(expectedJSON, &highlightExpected, offsetExpected)
+	colorizedActual := breakSliceWithColor(actualJSON, &highlightActual, offsetActual)
+
+	// Return the colorized differences in a Diff struct.
+	return Diff{
+		Expected: colorizedExpected,
+		Actual:   colorizedActual,
+	}
 }
 
 // checkKeyInMaps checks if the given key exists in both JSON maps and returns additional context if found.
-// jsonMap1: The first JSON map in byte form.
-// jsonMap2: The second JSON map in byte form.
+// expectedJSONMap: The first JSON map in byte form.
+// actualJSONMap: The second JSON map in byte form.
 // key: The key to check for existence in both maps.
 // Returns a string with additional context and a boolean indicating if the key was found in both maps.
-func checkKeyInMaps(jsonMap1, jsonMap2 []byte, key string) (string, bool) {
-	var map1, map2 map[string]interface{}
+func checkKeyInMaps(expectedJSONMap, actualJSONMap []byte, targetKey string) (string, bool, error) {
+	var expectedMap, actualMap map[string]interface{}
 
-	// Unmarshal the first JSON map into a Go map.
-	if err := json.Unmarshal(jsonMap1, &map1); err != nil {
-		return "", false // Return false if unmarshalling fails.
+	// Unmarshal both JSON maps into Go maps.
+	if err := json.Unmarshal(expectedJSONMap, &expectedMap); err != nil {
+		fmt.Println("Error unmarshalling expected JSON map", string(expectedJSONMap), err)
+		return "", false, err
+	}
+	if err := json.Unmarshal(actualJSONMap, &actualMap); err != nil {
+		fmt.Println("Error unmarshalling actual JSON map")
+		return "", false, err
 	}
 
-	// Unmarshal the second JSON map into a Go map.
-	if err := json.Unmarshal(jsonMap2, &map2); err != nil {
-		return "", false // Return false if unmarshalling fails.
-	}
-
-	// Iterate over the key-value pairs in the first map.
-	for k, v1 := range map1 {
-		// Check if the key exists in the second map and is not in the provided key string.
-		if v2, ok := map2[k]; ok &&
-			!strings.Contains(key, k) &&
-			reflect.DeepEqual(v1, v2) {
-			return fmt.Sprintf("%v:%v", k, v1), true // Return the key-value pair and true if they are equal.
+	// Iterate over the key-value pairs in the expected map.
+	for key, expectedValue := range expectedMap {
+		// Check if the key exists in the actual map, is not part of the provided key string, and values are deeply equal.
+		if actualValue, exists := actualMap[key]; exists && !strings.Contains(targetKey, key) && reflect.DeepEqual(expectedValue, actualValue) {
+			return fmt.Sprintf("%v:%v", key, expectedValue), true, nil
 		}
 	}
 
-	// Return an empty string and false if the key is not found in both maps or the values are not equal.
-	return "", false
+	// If no matching key-value pair is found, return an empty string and false.
+	return "", false, nil
+
 }
 
 // calculateJSONDiffs calculates the differences between two JSON objects and returns a diff string.
-// json1: The first JSON object in byte form.
-// json2: The second JSON object in byte form.
+// expectedJSON: The first JSON object in byte form.
+// actualJSON: The second JSON object in byte form.
 // Returns a string representing the differences and an error if any.
-func calculateJSONDiffs(json1 []byte, json2 []byte) (string, error) {
-	result1 := gjson.ParseBytes(json1) // Parse the first JSON object.
-	result2 := gjson.ParseBytes(json2) // Parse the second JSON object.
+func calculateJSONDiffs(expectedJSON, actualJSON []byte) (string, error) {
+	// Parse both JSON objects.
+	expectedResult := gjson.ParseBytes(expectedJSON)
+	actualResult := gjson.ParseBytes(actualJSON)
 
-	var diffStrings []string
+	var diffs []string
 
-	// Iterate over the key-value pairs in the first JSON object.
-	result1.ForEach(func(key, value gjson.Result) bool {
-		value2 := result2.Get(key.String())
-		if value2.Exists() && value2.String() == value.String() {
-			return true
-		}
-		diffStrings = append(diffStrings, fmt.Sprintf("- \"%s\": %v", key, value))
-		if value2.Exists() { // If the values are different, add both to the diff.
-			diffStrings = append(diffStrings, fmt.Sprintf("+ \"%s\": %v", key, value2))
-		}
-		return true
-	})
-
-	// Iterate over the key-value pairs in the second JSON object.
-	result2.ForEach(func(key, value gjson.Result) bool {
-		// If the key does not exist in the first JSON object, add it to the diff.
-		if !result1.Get(key.String()).Exists() {
-			diffStrings = append(diffStrings, fmt.Sprintf("+ \"%s\": %v", key, value))
+	// Iterate over key-value pairs in the expected JSON and compare with the actual JSON.
+	expectedResult.ForEach(func(key, expectedValue gjson.Result) bool {
+		actualValue := actualResult.Get(key.String())
+		if !actualValue.Exists() || expectedValue.String() != actualValue.String() {
+			diffs = append(diffs, fmt.Sprintf("- \"%s\": %v", key, expectedValue))
+			if actualValue.Exists() {
+				diffs = append(diffs, fmt.Sprintf("+ \"%s\": %v", key, actualValue))
+			}
 		}
 		return true
 	})
 
-	// Join the diff strings into a single string separated by newlines.
-	return strings.Join(diffStrings, "\n"), nil
+	// Iterate over the key-value pairs in the actual JSON and add any missing keys from the expected JSON.
+	actualResult.ForEach(func(key, actualValue gjson.Result) bool {
+		if !expectedResult.Get(key.String()).Exists() {
+			diffs = append(diffs, fmt.Sprintf("+ \"%s\": %v", key, actualValue))
+		}
+		return true
+	})
+
+	// Join the diffs into a single string separated by newlines.
+	return strings.Join(diffs, "\n"), nil
 }
 
 // extractKey extracts the keys from the diff string.
 // diffString: The input string representing the differences.
 // Returns a string containing all the keys separated by a pipe character.
 func extractKey(diffString string) string {
-	diffStrings := strings.Split(diffString, "\n") // Split the diff string into lines.
+	diffLines := strings.Split(diffString, "\n") // Split the diff string into lines.
 	var keys []string
 
 	// Iterate over each line in the diff string.
-	for _, str := range diffStrings {
-		str = strings.TrimSpace(str[1:]) // Remove the leading '-' or '+' and trim spaces.
+	for _, line := range diffLines {
+		// Remove the leading '-' or '+' and any surrounding spaces
+		line = strings.TrimSpace(line[1:])
 
-		colonIndex := strings.Index(str, ":") // Find the index of the colon.
-		if colonIndex == -1 {
-			continue // Skip if there is no colon.
+		if colonIndex := strings.Index(line, ":"); colonIndex != -1 {
+			// Extract and clean up the key
+			key := strings.Trim(line[:colonIndex], `"'`)
+			keys = append(keys, key)
 		}
-
-		key := strings.TrimSpace(str[:colonIndex]) // Extract the key up to the colon.
-		key = strings.Trim(key, `"'`)              // Trim quotes from the key.
-		keys = append(keys, key)                   // Add the key to the list of keys.
+		// Add the key to the list of keys.
 	}
 
 	// Join the keys into a single string separated by a pipe character.
@@ -173,19 +178,18 @@ func extractKey(diffString string) string {
 // value: The value to be written.
 // indent: The indentation string to use for formatting.
 // colorFunc: The function to apply color to the value, if provided.
-func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, indent string, colorFunc func(a ...interface{}) string) {
+func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, indent string, applyColor func(a ...interface{}) string) {
 	// Serialize the value to a pretty-printed JSON string.
 	serializedValue, _ := json.MarshalIndent(value, "", "  ")
-	valueStr := string(serializedValue)
+	formattedValue := string(serializedValue)
 
 	// Check if a color function is provided and the value is not empty.
-	if colorFunc != nil && !reflect.DeepEqual(value, "") {
-		// Write the key-value pair with colorization.
-		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, colorFunc(valueStr)))
-		return
+	if applyColor != nil && value != "" {
+		formattedValue = applyColor(formattedValue)
 	}
-	// Write the key-value pair without colorization.
-	builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, valueStr))
+
+	// Write the key-value pair to the builder with or without colorization.
+	builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
 
 }
 
@@ -206,60 +210,65 @@ func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func
 	// Iterate over the elements of the slices up to the maximum length.
 	for i := 0; i < maxLength; i++ {
 		var aValue, bValue interface{}
-		var aExists, bExists bool
+		aExists, bExists := i < len(a), i < len(b) // Flags to indicate if values exist in both slices
 
 		// Assign the current element from the first slice if within bounds.
-		if i < len(a) {
+		if aExists {
 			aValue = a[i]
-			aExists = true
 		}
 
 		// Assign the current element from the second slice if within bounds.
-		if i < len(b) {
+		if bExists {
 			bValue = b[i]
-			bExists = true
 		}
 
-		if !aExists && !bExists {
+		// Use a switch to handle the cases based on the existence of values in both slices.
+		switch {
+		case !aExists && !bExists:
+			// If neither value exists, continue the loop.
 			continue
-		}
 
-		if !aExists {
+		case !aExists:
+			// Only the second slice has a value.
 			actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, green(serialize(bValue))))
-			continue
-		}
-		if !bExists {
+
+		case !bExists:
+			// Only the first slice has a value.
 			expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, red(serialize(aValue))))
-			continue
-		}
-		// If both elements exist, compare and colorize them.
-		switch v1 := aValue.(type) {
-		case map[string]interface{}:
-			if v2, ok := bValue.(map[string]interface{}); ok {
-				// Recursively compare and colorize maps.
-				expectedText, actualText := compareAndColorizeMaps(v1, v2, indent+"  ", red, green)
-				expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, expectedText))
-				actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, actualText))
-				continue
-			}
-		case []interface{}:
-			if v2, ok := bValue.([]interface{}); ok {
-				// Recursively compare and colorize slices.
-				expectedText, actualText := compareAndColorizeSlices(v1, v2, indent+"  ", red, green)
-				expectedOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, i, expectedText, indent))
-				actualOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, i, actualText, indent))
-				continue
-			}
+
 		default:
-			if reflect.DeepEqual(aValue, bValue) {
-				// If values are not equal, write the values with colors.
-				expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, aValue))
-				actualOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, bValue))
-				continue
+			// If both elements exist, compare and colorize them.
+			switch v1 := aValue.(type) {
+			case map[string]interface{}:
+				if v2, ok := bValue.(map[string]interface{}); ok {
+					// Recursively compare and colorize maps.
+					expectedText, actualText := compareAndColorizeMaps(v1, v2, indent+"  ", red, green)
+					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, expectedText))
+					actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, actualText))
+					continue
+				}
+
+			case []interface{}:
+				if v2, ok := bValue.([]interface{}); ok {
+					// Recursively compare and colorize slices.
+					expectedText, actualText := compareAndColorizeSlices(v1, v2, indent+"  ", red, green)
+					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, i, expectedText, indent))
+					actualOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, i, actualText, indent))
+					continue
+				}
+
+			default:
+				// If values are not deeply equal, write the values with colors.
+				if reflect.DeepEqual(aValue, bValue) {
+					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, aValue))
+					actualOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, bValue))
+					continue
+				}
 			}
+			// If the values are not equal, colorize them.
+			expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, red(serialize(aValue))))
+			actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, green(serialize(bValue))))
 		}
-		expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, red(aValue)))
-		actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, green(bValue)))
 	}
 
 	// Return the resulting colorized differences for the expected and actual slices.
@@ -528,7 +537,7 @@ func breakWithColor(input string, c *color.Attribute, highlightRanges []colorRan
 
 		lineLen++
 		// Break the line if it reaches the maximum line length.
-		if lineLen == max_line_length {
+		if lineLen == maxLineLength {
 			output.WriteString("\n")
 			lineLen = 0
 		}
@@ -548,7 +557,7 @@ func isControlCharacter(char rune) bool {
 }
 
 // maxLineLength is the maximum length of a line before it is wrapped.
-const max_line_length = 50
+const maxLineLength = 50
 
 // breakLines breaks the input string into lines of a specified maximum length.
 // input: The string to be processed and broken into lines.
@@ -576,7 +585,7 @@ func breakLines(input string) string {
 			ansiSequenceBuilder.WriteRune(char) // Add the start of the ANSI sequence to the builder
 		case isControlCharacter(char) && char != '\n':
 			currentLine.WriteRune(char) // Add control characters directly to the current line
-		case lineLength >= max_line_length:
+		case lineLength >= maxLineLength:
 			output.WriteString(currentLine.String()) // Add the current line to the output
 			output.WriteRune('\n')                   // Add a newline character
 			currentLine.Reset()                      // Reset the current line builder
@@ -719,12 +728,12 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 // expect: The map containing the expected header values.
 // actual: The map containing the actual header values.
 // Returns a ColorizedResponse containing the colorized differences for the expected and actual headers.
-func CompareHeaders(expect, actual map[string]string) Diff {
+func CompareHeaders(expectedHeaders, actualHeaders map[string]string) Diff {
 	var expectAll, actualAll strings.Builder // Builders for the resulting strings.
 
 	// Iterate over each key-value pair in the expected map.
-	for key, expValue := range expect {
-		actValue := actual[key] // Get the corresponding value from the actual map.
+	for key, expValue := range expectedHeaders {
+		actValue := actualHeaders[key] // Get the corresponding value from the actual map.
 
 		// Calculate the offsets of the differences between the expected and actual values.
 		offsetsStr1, offsetsStr2, _ := diffArrayRange(string(expValue), string(actValue))
@@ -784,14 +793,14 @@ func contains(slice []int, element int) bool {
 }
 
 // diffIndexRange calculates the ranges of differences between two strings of words.
-// It returns a slice of Range structs indicating the start and end indices of differences and a boolean indicating if there are differences.
-func diffIndexRange(s1, s2 string) ([]colorRange, bool) {
+// It returns a slice of colorRange structs indicating the start and end indices of differences and a boolean indicating if there are differences.
+func diffIndexRange(str1, str2 string) ([]colorRange, bool) {
 	var ranges []colorRange // Slice to hold the ranges of differences.
-	diff := false           // Boolean to track if there are any differences.
+	hasDifference := false  // Boolean to track if there are any differences.
 
 	// Split the input strings into slices of words.
-	words1 := strings.Split(s1, " ")
-	words2 := strings.Split(s2, " ")
+	words1 := strings.Split(str1, " ")
+	words2 := strings.Split(str2, " ")
 
 	// Determine the maximum length between the two word slices.
 	maxLen := len(words1)
@@ -803,40 +812,47 @@ func diffIndexRange(s1, s2 string) ([]colorRange, bool) {
 
 	// Iterate over the words up to the maximum length.
 	for i := 0; i < maxLen; i++ {
-		word1, word2 := "", "" // Initialize variables for the current words in each string.
+		var word1, word2 string
 
-		// Assign the current word from the first string if within bounds.
-		if i < len(words1) {
+		switch {
+		case i < len(words1) && i < len(words2):
+			// Both strings have words at index i, compare them.
 			word1 = words1[i]
-		}
-		// Assign the current word from the second string if within bounds.
-		if i < len(words2) {
 			word2 = words2[i]
+			if word1 != word2 {
+				hasDifference = true
+				// Calculate the end index for the differing word.
+				endIndex := startIndex + len(word1)
+				// Record the range of the differing words.
+				ranges = append(ranges, colorRange{Start: startIndex, End: endIndex})
+			}
+		case i < len(words1):
+			// Only the first string has a word at index i (i.e., words1 is longer).
+			word1 = words1[i]
+			hasDifference = true
+			// Calculate the end index and record the range.
+			endIndex := startIndex + len(word1)
+			ranges = append(ranges, colorRange{Start: startIndex, End: endIndex})
+		case i < len(words2):
+			// Only the second string has a word at index i (i.e., words2 is longer).
+			word2 = words2[i]
+			hasDifference = true
+			// This case does not add ranges from words2 because we are only recording ranges from words1.
 		}
 
-		// If the words at the current index are different, record the range.
-		if word1 != word2 {
-			if !diff {
-				diff = true // Set the difference flag to true.
-			}
-			// Calculate the end index for the current range.
-			endIndex := startIndex + len(word1)
-			// Append the range of the differing words to the ranges slice.
-			ranges = append(ranges, colorRange{Start: startIndex, End: endIndex + 1})
-		}
-		// Update the starting index for the next word.
+		// Update the starting index for the next word, accounting for space after each word.
 		startIndex += len(word1) + 1
 	}
 
 	// Return the ranges of differences and the difference flag.
-	return ranges, diff
+	return ranges, hasDifference
 }
 
 // diffArrayRange calculates the indices of differences between two strings of words.
 // It returns the indices where the words differ in both strings, and a boolean indicating if there are differences.
 func diffArrayRange(s1, s2 string) ([]int, []int, bool) {
 	var indices1, indices2 []int // Slices to hold the indices of differences for each string.
-	diff := false                // Boolean to track if there are any differences.
+	diffFound := false           // Boolean to track if there are any differences.
 
 	// Split the input strings into slices of words.
 	words1 := strings.Split(s1, " ")
@@ -850,43 +866,22 @@ func diffArrayRange(s1, s2 string) ([]int, []int, bool) {
 
 	// Iterate over the words up to the maximum length.
 	for i := 0; i < maxLen; i++ {
-		word1, word2 := "", "" // Initialize variables for the current words in each string.
-
-		// Assign the current word from the first string if within bounds.
-		if i < len(words1) {
-			word1 = words1[i]
-		}
-		// Assign the current word from the second string if within bounds.
-		if i < len(words2) {
-			word2 = words2[i]
-		}
-
-		// If the words at the current index are different, record the index.
-		if word1 != word2 {
-			// Add the index to the first string's differences if within bounds.
-			if i < len(words1) {
+		switch {
+		case i < len(words1) && i < len(words2): // Both strings have a word at index i
+			if words1[i] != words2[i] { // If words are different, record the indices
 				indices1 = append(indices1, i)
-			}
-			// Add the index to the second string's differences if within bounds.
-			if i < len(words2) {
 				indices2 = append(indices2, i)
+				diffFound = true
 			}
-			diff = true // Set the difference flag to true.
+		case i < len(words1): // Only the first string has a word at index i
+			indices1 = append(indices1, i)
+			diffFound = true
+		case i < len(words2): // Only the second string has a word at index i
+			indices2 = append(indices2, i)
+			diffFound = true
 		}
 	}
 
-	// Handle the case where the first string is longer than the second string.
-	if len(words1) > len(words2) {
-		for i := len(words2); i < len(words1); i++ {
-			indices1 = append(indices1, i) // Record the remaining indices as differences.
-		}
-		// Handle the case where the second string is longer than the first string.
-	} else if len(words2) > len(words1) {
-		for i := len(words1); i < len(words2); i++ {
-			indices2 = append(indices2, i) // Record the remaining indices as differences.
-		}
-	}
-
-	// Return the indices of differences for both strings and the difference flag.
-	return indices1, indices2, diff
+	// Return the indices of differences for both strings and whether differences were found.
+	return indices1, indices2, diffFound
 }
