@@ -25,11 +25,6 @@ type Diff struct {
 	Actual   string
 }
 
-// CompareJSON compares two JSON objects and returns the differences as colorized strings.
-// json1: The first JSON object to compare.
-// json2: The second JSON object to compare.
-// noise: A map containing fields to ignore during the comparison.
-// Returns a ColorizedResponse containing the colorized differences for the expected and actual JSON responses.
 func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]string, disableColor bool) (Diff, error) {
 	color.NoColor = disableColor
 	// Calculate the differences between the two JSON objects.
@@ -329,10 +324,12 @@ func compare(key string, val1, val2 interface{}, indent string, expect, actual *
 			// Marshal values to pretty-printed JSON strings
 			val1Str, err := json.MarshalIndent(val1, "", "  ")
 			if err != nil {
+				fmt.Println("Error marshalling expected value")
 				return
 			}
 			val2Str, err := json.MarshalIndent(val2, "", "  ")
 			if err != nil {
+				fmt.Println("Error marshalling actual value")
 				return
 			}
 			// Colorize the differences in the values
@@ -551,7 +548,7 @@ func breakWithColor(input string, c *color.Attribute, highlightRanges []colorRan
 	return output.String()
 }
 
-// isControlCharacter checks if a character is a control character.
+// isControlCharacter checks if a character is a non-printable character.
 func isControlCharacter(char rune) bool {
 	return char < ' '
 }
