@@ -55,25 +55,100 @@ go get github.com/keploy/jsonDiff
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
-	"github.com/keploy/jsonDiff"
+	"regexp"
+	"strings"
+
+	jsonDiff "github.com/keploy/jsonDiff"
+	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
-	json1 := []byte(`{"name": "Alice", "age": 30, "city": "New York"}`)
-	json2 := []byte(`{"name": "Alice", "age": 31, "city": "Los Angeles"}`)
+	json1 := []byte("{\"animals\":[{\"name\":\"Dog\"},{\"name\":\"Cat\"},{\"name\":\"Elephant\"}]}")
+	json2 := []byte("{\"animals\":[{\"name\":\"Dog\"},{\"name\":\"Cat\"},{\"apple\":\"lusiancs\"},{\"name\":\"Elephant\"}]}")
 
-	diff, err := jsonDiff.ColorJSONDiff(json1, json2, nil)
+	diff, err := jsonDiff.CompareJSON(json1, json2, nil, false)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
-
-	fmt.Println("Expected Response:")
-	fmt.Println(diff.ExpectedResponse)
-	fmt.Println("Actual Response:")
-	fmt.Println(diff.ActualResponse)
+	result := expectActualTable(diff.Actual, diff.Expected, "", false)
+	println(result)
 }
+
+func wrapTextWithAnsi(input string) string {
+	scanner := bufio.NewScanner(strings.NewReader(input)) // Create a scanner to read the input string line by line.
+	var wrappedBuilder strings.Builder                    // Builder for the resulting wrapped text.
+	currentAnsiCode := ""                                 // Variable to hold the current ANSI escape sequence.
+	lastAnsiCode := ""                                    // Variable to hold the last ANSI escape sequence.
+
+	// Iterate over each line in the input string.
+	for scanner.Scan() {
+		line := scanner.Text() // Get the current line.
+
+		// If there is a current ANSI code, append it to the builder.
+		if currentAnsiCode != "" {
+			wrappedBuilder.WriteString(currentAnsiCode)
+		}
+
+		// Find all ANSI escape sequences in the current line.
+		startAnsiCodes := ansiRegex.FindAllString(line, -1)
+		if len(startAnsiCodes) > 0 {
+			// Update the last ANSI escape sequence to the last one found in the line.
+			lastAnsiCode = startAnsiCodes[len(startAnsiCodes)-1]
+		}
+
+		// Append the current line to the builder.
+		wrappedBuilder.WriteString(line)
+
+		// Check if the current ANSI code needs to be reset or updated.
+		if (currentAnsiCode != "" && !strings.HasSuffix(line, ansiResetCode)) || len(startAnsiCodes) > 0 {
+			// If the current line does not end with a reset code or if there are ANSI codes, append a reset code.
+			wrappedBuilder.WriteString(ansiResetCode)
+			// Update the current ANSI code to the last one found in the line.
+			currentAnsiCode = lastAnsiCode
+		} else {
+			// If no ANSI codes need to be maintained, reset the current ANSI code.
+			currentAnsiCode = ""
+		}
+
+		// Append a newline character to the builder.
+		wrappedBuilder.WriteString("\n")
+	}
+
+	// Return the processed string with properly wrapped ANSI escape sequences.
+	return wrappedBuilder.String()
+}
+
+func expectActualTable(exp string, act string, field string, centerize bool) string {
+	buf := &bytes.Buffer{}
+	table := tablewriter.NewWriter(buf)
+
+	if centerize {
+		table.SetAlignment(tablewriter.ALIGN_CENTER)
+	} else {
+		table.SetAlignment(tablewriter.ALIGN_LEFT)
+	}
+	// jsonDiff.JsonDiff()
+	exp = wrapTextWithAnsi(exp)
+	act = wrapTextWithAnsi(act)
+	table.SetHeader([]string{fmt.Sprintf("Expect %v", field), fmt.Sprintf("Actual %v", field)})
+	table.SetAutoWrapText(false)
+	table.SetBorder(false)
+	table.SetColMinWidth(0, maxLineLength)
+	table.SetColMinWidth(1, maxLineLength)
+	table.Append([]string{exp, act})
+	table.Render()
+	return buf.String()
+}
+
+const maxLineLength = 50
+
+var ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+
+var ansiResetCode = "\x1b[0m"
 ```
 
 ## Comparing Headers
@@ -82,28 +157,102 @@ func main() {
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
-	"github.com/yourusername/jsonDiff"
+	"regexp"
+	"strings"
+
+	jsonDiff "github.com/keploy/jsonDiff"
+	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
-	expectedHeaders := map[string]string{
-		"Content-Type": "application/json",
-		"Authorization": "Bearer token123",
+	json1 := map[string]string{
+		"Etag": "W/\"1c0-4VkjzPwyKEH0Xy9lGO28f/cyPk4\"",
+		"Vary": "a",
 	}
-
-	actualHeaders := map[string]string{
-		"Content-Type": "application/json",
-		"Authorization": "Bearer token456",
+	json2 := map[string]string{
+		"Etag": "W/\"1c0-8j/k9MOCbWGtKgVesjFGmY6dEAs\"",
+		"Vary": "Origin",
 	}
+	diff := jsonDiff.CompareHeaders(json1, json2)
 
-	diff := jsonDiff.ColorHeaderDiff(expectedHeaders, actualHeaders)
-
-	fmt.Println("Expected Headers:")
-	fmt.Println(diff.ExpectedResponse)
-	fmt.Println("Actual Headers:")
-	fmt.Println(diff.ActualResponse)
+	result := expectActualTable(diff.Actual, diff.Expected, "", false)
+	println(result)
 }
+
+func wrapTextWithAnsi(input string) string {
+	scanner := bufio.NewScanner(strings.NewReader(input)) // Create a scanner to read the input string line by line.
+	var wrappedBuilder strings.Builder                    // Builder for the resulting wrapped text.
+	currentAnsiCode := ""                                 // Variable to hold the current ANSI escape sequence.
+	lastAnsiCode := ""                                    // Variable to hold the last ANSI escape sequence.
+
+	// Iterate over each line in the input string.
+	for scanner.Scan() {
+		line := scanner.Text() // Get the current line.
+
+		// If there is a current ANSI code, append it to the builder.
+		if currentAnsiCode != "" {
+			wrappedBuilder.WriteString(currentAnsiCode)
+		}
+
+		// Find all ANSI escape sequences in the current line.
+		startAnsiCodes := ansiRegex.FindAllString(line, -1)
+		if len(startAnsiCodes) > 0 {
+			// Update the last ANSI escape sequence to the last one found in the line.
+			lastAnsiCode = startAnsiCodes[len(startAnsiCodes)-1]
+		}
+
+		// Append the current line to the builder.
+		wrappedBuilder.WriteString(line)
+
+		// Check if the current ANSI code needs to be reset or updated.
+		if (currentAnsiCode != "" && !strings.HasSuffix(line, ansiResetCode)) || len(startAnsiCodes) > 0 {
+			// If the current line does not end with a reset code or if there are ANSI codes, append a reset code.
+			wrappedBuilder.WriteString(ansiResetCode)
+			// Update the current ANSI code to the last one found in the line.
+			currentAnsiCode = lastAnsiCode
+		} else {
+			// If no ANSI codes need to be maintained, reset the current ANSI code.
+			currentAnsiCode = ""
+		}
+
+		// Append a newline character to the builder.
+		wrappedBuilder.WriteString("\n")
+	}
+
+	// Return the processed string with properly wrapped ANSI escape sequences.
+	return wrappedBuilder.String()
+}
+
+func expectActualTable(exp string, act string, field string, centerize bool) string {
+	buf := &bytes.Buffer{}
+	table := tablewriter.NewWriter(buf)
+
+	if centerize {
+		table.SetAlignment(tablewriter.ALIGN_CENTER)
+	} else {
+		table.SetAlignment(tablewriter.ALIGN_LEFT)
+	}
+	// jsonDiff.JsonDiff()
+	exp = wrapTextWithAnsi(exp)
+	act = wrapTextWithAnsi(act)
+	table.SetHeader([]string{fmt.Sprintf("Expect %v", field), fmt.Sprintf("Actual %v", field)})
+	table.SetAutoWrapText(false)
+	table.SetBorder(false)
+	table.SetColMinWidth(0, maxLineLength)
+	table.SetColMinWidth(1, maxLineLength)
+	table.Append([]string{exp, act})
+	table.Render()
+	return buf.String()
+}
+
+const maxLineLength = 50
+
+var ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+
+var ansiResetCode = "\x1b[0m"
 
 ```
 
