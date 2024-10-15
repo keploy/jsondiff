@@ -1,0 +1,927 @@
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "name": [31m"Cat"[0m ,[0m                         |            "name": [32m"Dog"[0m ,[0m                          
+  [0m           "id": 3,[0m                                | [0m           "id": 3,[0m                                 
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+nested JSONs with different structures
+"b400a1d1cb03c0080f4cf1ce133de291cd61f27bd93764d9a0f8316e65cc745e A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+   [0]: {                                            |  [0]: {                                             
+       "name": [31m"Cat"[0m ,[0m                               |      "name": [32m"Dog"[0m ,[0m                                
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [1]: {[0m                                            | [0m [1]: {[0m                                             
+  [0m     "name": [31m"Dog"[0m ,[0m                               | [0m     "name": [32m"Cat"[0m ,[0m                                
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [2]: {[0m                                            | [0m [2]: {[0m                                             
+  [0m     "[31mname[0m": [31m"Elephant"[0m,[0m                           | [0m     "[32mapple[0m": [32m"lusiancs"[0m,[0m                           
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m[0m                                                   | [0m [3]: [32m{[0m                                             
+                                                     | [32m  "name": "Elephant"[0m                                
+                                                     | [32m}[0m[0m                                                   
+                                                     | [0m[0m                                                    
+                                                     |                                                     
+
+nested JSONs with array length differences
+"942a29ad1117489bc26adfa55f760b80431775a68c3e6b14fa330c4fdfc6c113 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+   [0]: {                                            |  [0]: {                                             
+       "name": [31m"Cat"[0m ,[0m                               |      "name": [32m"Dog"[0m ,[0m                                
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [1]: {[0m                                            | [0m [1]: {[0m                                             
+  [0m     "name": [31m"Dog"[0m ,[0m                               | [0m     "name": [32m"Cat"[0m ,[0m                                
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [2]: {[0m                                            | [0m [2]: {[0m                                             
+  [0m     "[31mname[0m": [31m"Elephant"[0m,[0m                           | [0m     "[32mapple[0m": [32m"lusiancs"[0m,[0m                           
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m[0m                                                   | [0m[0m                                                    
+                                                     |                                                     
+
+nested JSONs with array differences
+"942a29ad1117489bc26adfa55f760b80431775a68c3e6b14fa330c4fdfc6c113 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "animal": {                                     |    "animal": {                                      
+         "attributes": {                             |        "attributes": {                              
+             "color": [31m"black"[0m ,[0m                      |            "color": [32m"white"[0m ,[0m                       
+  [0m           "age": 5,[0m                               | [0m           "age": 5,[0m                                
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m       "name": "Cat",[0m                              | [0m       "name": "Cat",[0m                               
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+different key-value pairs in nested JSON
+"c4d3a315342e20149eb091f28553c84231d9eb56dead99219782202e3b16e036 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "animals": {                                    |    "animals": {                                     
+         "domestic": [                               |        "domestic": [                                
+           [0]: [31m"Cat"[0m[0m                                |          [0]: [32m"Dog"[0m[0m                                 
+  [0m         [1]: [31m"Dog"[0m[0m                                | [0m         [1]: [32m"Cat"[0m[0m                                 
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m       "wild": [[0m                                   | [0m       "wild": [[0m                                    
+  [0m         [0]: [31m"Elephant"[0m[0m                           | [0m         [0]: [32m"Lion"[0m[0m                                
+  [0m         [1]: [31m"Lion"[0m[0m                               | [0m         [1]: [32m"Elephant"[0m[0m                            
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+nested arrays within objects
+"71177a8bc7e1abfe019a4a1fad9407dc547362a59d70d16761ecc8f50d9ab31e A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "level3": {                             |            "level3": {                              
+                 "name": [31m"Cat"[0m ,[0m                     |                "name": [32m"Dog"[0m ,[0m                      
+  [0m               "id": 3,[0m                            | [0m               "id": 3,[0m                             
+  [0m             }[0m                                     | [0m             }[0m                                      
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+three layered nested maps
+"748a984d11fa3e28ac12f17280043926cda016f4ed91b64c1fdfc378dc39840f A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "animal": {                                     |    "animal": {                                      
+         "name": "Cat",                              |        "name": "Cat",                               
+         "features": {                               |        "features": {                                
+             "[31mfurly[0m": [31m"short"[0m,[0m                       |            "tail": "long",                          
+  [0m           "tail": "long",[0m                         |            "[32mfur[0m": [32m"long"[0m,[0m                           
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+nested objects with different keys
+"e40b10192f58e3cc848e216beb7a9b4ad2cef79cb042e5a82310eac0cca41d56 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "zoo": {                                        |    "zoo": {                                         
+         "animals": [                                |        "animals": [                                 
+           [0]: {                                    |          [0]: {                                     
+               "type": "mammal",                     |              "type": "mammal",                      
+               "name": "Elephant",                   |              "name": "Elephant",                    
+               "age": 10,                            |              "age": 10,                             
+             }                                       |            }                                        
+           [1]: {                                    |          [1]: {                                     
+               "type": "bird",                       |              "type": "bird",                        
+               "name": "Parrot",                     |              "name": "Parrot",                      
+               "age": [31m2[0m ,[0m                            |              "age": [32m3[0m ,[0m                             
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+deeply nested mixed structures
+"7470cc614de3e68eb00d38f087b208d73822244dca550c3103caa61d7bc16f3f A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "family": {                                     |    "family": {                                      
+         "parents": [                                |        "parents": [                                 
+           [0]: {                                    |          [0]: {                                     
+               "name": [31m"Alice"[0m ,[0m                     |              "name": [32m"Bob"[0m ,[0m                        
+  [0m             "age": [31m40[0m ,[0m                           | [0m             "age": [32m42[0m ,[0m                            
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m         [1]: {[0m                                    | [0m         [1]: {[0m                                     
+  [0m             "name": [31m"Bob"[0m ,[0m                       | [0m             "name": [32m"Alice"[0m ,[0m                      
+  [0m             "age": [31m42[0m ,[0m                           | [0m             "age": [32m40[0m ,[0m                            
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m       "children": [[0m                               | [0m       "children": [[0m                                
+  [0m         [0]: {[0m                                    | [0m         [0]: {[0m                                     
+  [0m             "name": [31m"Charlie"[0m ,[0m                   | [0m             "name": [32m"Daisy"[0m ,[0m                      
+  [0m             "age": [31m10[0m ,[0m                           | [0m             "age": [32m8[0m ,[0m                             
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m         [1]: {[0m                                    | [0m         [1]: {[0m                                     
+  [0m             "name": [31m"Daisy"[0m ,[0m                     | [0m             "name": [32m"Charlie"[0m ,[0m                    
+  [0m             "age": [31m8[0m ,[0m                            | [0m             "age": [32m10[0m ,[0m                            
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+complex nested objects and arrays
+"8317e30c64967ec9a7d82332831630315a64ab03496dc11851984693ccc6ef3c A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+   [0]: {                                            |  [0]: {                                             
+       "title": "Book [31mA"[0m ,[0m                           |      "title": "Book [32mB"[0m ,[0m                            
+  [0m     "author": {[0m                                   | [0m     "author": {[0m                                    
+  [0m         "name": "Author [31m1"[0m ,[0m                      | [0m         "name": "Author [32m2"[0m ,[0m                       
+  [0m       }[0m                                           | [0m       }[0m                                            
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [1]: {[0m                                            | [0m [1]: {[0m                                             
+  [0m     "title": "Book [31mB"[0m ,[0m                           | [0m     "title": "Book [32mA"[0m ,[0m                            
+  [0m     "author": {[0m                                   | [0m     "author": {[0m                                    
+  [0m         "name": "Author [31m2"[0m ,[0m                      | [0m         "name": "Author [32m1"[0m ,[0m                       
+  [0m       }[0m                                           | [0m       }[0m                                            
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m[0m                                                   | [0m[0m                                                    
+                                                     |                                                     
+
+different arrays with nested objects
+"ef4dd42bb9dc629bbfade57743e72663c9a5d236c0e92cb4ce8c80e0d1304350 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+                                                     |                                                     
+  key1:[a b c]                                       | key1:[a b c]                                        
+                                                     |                                                     
+
+map containing array and string
+"a77a7d1602a82d778c027e6de0d17ac5d463128fd49c3736714cbd9a62f6c36d A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "outer": {                                      |    "outer": {                                       
+         "inner": [                                  |        "inner": [                                   
+           [0]: {                                    |          [0]: {                                     
+               "key": "value1",                      |              "key": "value1",                       
+             }                                       |            }                                        
+           [1]: {                                    |          [1]: {                                     
+               "key": [31m"value2"[0m ,[0m                     |              "key": [32m"value3"[0m ,[0m                      
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m       "array": [[0m                                  | [0m       "array": [[0m                                   
+  [0m         [0]: 1[0m                                    | [0m         [0]: 1[0m                                     
+  [0m         [1]: [31m2[0m[0m                                    | [0m         [1]: [32m3[0m[0m                                     
+  [0m         [2]: [31m3[0m[0m                                    | [0m         [2]: [32m2[0m[0m                                     
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+complex nested structures with maps and arrays
+"a46a95231b9cd0ad10bc0cfbaa15b106a626f028026f5fb1c04c277706dea4ba A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "value": [31m10[0m ,[0m                           |            "value": [32m20[0m ,[0m                            
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+nested maps with number differences
+"faa2ae50e03a03bd9b555d1422c9a62da0d8ab64bcaafa95d7da7a7f92ee0f5b A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+   [0]: {                                            |  [0]: {                                             
+       "b": [                                        |      "b": [                                         
+         [0]: {                                      |        [0]: {                                       
+             "c": "d",                               |            "c": "d",                                
+           }                                         |          }                                          
+         [1]: [31m2[0m[0m                                      |        [1]: [32m3[0m[0m                                       
+  [0m       [2]: [31m3[0m[0m                                      | [0m       [2]: [32m2[0m[0m                                       
+  [0m       [3]: {[0m                                      | [0m       [3]: {[0m                                       
+  [0m           "e": "f",[0m                               | [0m           "e": "f",[0m                                
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m     ][0m                                             | [0m     ][0m                                              
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [1]: [[0m                                            | [0m [1]: [[0m                                             
+  [0m   [0]: [31m"g"[0m[0m                                        | [0m   [0]: [32m"h"[0m[0m                                         
+  [0m   [1]: [31m"h"[0m[0m                                        | [0m   [1]: [32m"g"[0m[0m                                         
+  [0m ][0m                                                 | [0m ][0m                                                  
+  [0m[0m                                                   | [0m[0m                                                    
+                                                     |                                                     
+
+complex multi-type nested structures
+"ee30acf419b3b9931f71899ff947b4ac0e91a21603892bcd01cac0385dcf519f A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "nested": {                                     |    "nested": {                                      
+         "key": [                                    |        "key": [                                     
+                                                     |          [0]: [32m{[0m                                     
+         ]                                           | [32m  "mapKey1": "value1"[0m                               
+       }                                             | [32m}[0m[0m                                                   
+   }                                                 | [0m         [1]: [32m{[0m                                     
+                                                     | [32m  "mapKey2": "value2"[0m                               
+                                                     | [32m}[0m[0m                                                   
+                                                     | [0m[0m                                                    
+                                                     | [0m       ][0m                                            
+                                                     | [0m     }[0m                                              
+                                                     | [0m }[0m                                                  
+                                                     |                                                     
+
+empty array to array of maps
+"3cf5725c92bc27fa26481d4c5a686beef5a240f963e42825b3b3da47925b2f99 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+                                                     |                                                     
+  					"key": [                                           | 					"key": [                                            
+  						{                                                  | 						{                                                   
+  							"mapKey1": "value1",                               | 							"mapKey1": "value1",                                
+  							"mapKey2": [1, 2, {"subKey": "subValue"}],         | 							"mapKey2": [1, 2, {"subKey": "subValue"}],          
+  							"mapKey3": {"innerKey": "innerValue"}              | 							"mapKey3": {"innerKey": "innerValue"}               
+  						},                                                 | 						},                                                  
+  						{                                                  | 						{                                                   
+  							"mapKey4": "value2",                               | 							"mapKey4": "value2",                                
+  							"mapKey5": [3, 4, {"subKey2": "subValue3"}]        | 							"mapKey5": [3, 4, {"subKey2": "subValue3"}]         
+  ,                                                  | ,                                                   
+  							"mapKey6": {"innerKey2": "innerValue2"}            | 							"mapKey6": {"innerKey2": "innerValue2"}             
+  						}                                                  | 						}                                                   
+  					]                                                  | 					]                                                   
+  				}                                                  | 				}                                                   
+                                                     |                                                     
+
+array to complex array of maps
+"b6fdeac7920ec2c106856d213c2fc0aa285e83c62fac2d1d54884516b0848735 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+   [0]: {                                            |  [0]: {                                             
+       "b": [                                        |      "b": [                                         
+         [0]: {                                      |        [0]: {                                       
+             "c": "d",                               |            "c": "d",                                
+           }                                         |          }                                          
+         [1]: [31m2[0m[0m                                      |        [1]: [32m3[0m[0m                                       
+  [0m       [2]: [31m3[0m[0m                                      | [0m       [2]: [32m2[0m[0m                                       
+  [0m       [3]: {[0m                                      | [0m       [3]: {[0m                                       
+  [0m           "e": "f",[0m                               | [0m           "e": "f",[0m                                
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m     ][0m                                             | [0m     ][0m                                              
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [1]: [[0m                                            | [0m [1]: [[0m                                             
+  [0m   [0]: [31m"g"[0m[0m                                        | [0m   [0]: [32m"h"[0m[0m                                         
+  [0m   [1]: [31m"h"[0m[0m                                        | [0m   [1]: [32m"g"[0m[0m                                         
+  [0m ][0m                                                 | [0m ][0m                                                  
+  [0m[0m                                                   | [0m[0m                                                    
+                                                     |                                                     
+
+complex multi-type nested structures
+"ee30acf419b3b9931f71899ff947b4ac0e91a21603892bcd01cac0385dcf519f A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+   [0]: {                                            |  [0]: {                                             
+       "name": [31m"Cat"[0m ,[0m                               |      "name": [32m"Dog"[0m ,[0m                                
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [1]: {[0m                                            | [0m [1]: {[0m                                             
+  [0m     "name": [31m"Dog"[0m ,[0m                               | [0m     "name": [32m"Cat"[0m ,[0m                                
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [2]: {[0m                                            | [0m [2]: {[0m                                             
+  [0m     "[31mname[0m": [31m"Elephant"[0m,[0m                           | [0m     "[32mapple[0m": [32m"lusiancs"[0m,[0m                           
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m[0m                                                   | [0m [3]: [32m{[0m                                             
+                                                     | [32m  "name": "Elephant"[0m                                
+                                                     | [32m}[0m[0m                                                   
+                                                     | [0m[0m                                                    
+                                                     |                                                     
+
+nested JSONs with array length differences
+"942a29ad1117489bc26adfa55f760b80431775a68c3e6b14fa330c4fdfc6c113 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+   [0]: {                                            |  [0]: {                                             
+       "name": [31m"Cat"[0m ,[0m                               |      "name": [32m"Dog"[0m ,[0m                                
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [1]: {[0m                                            | [0m [1]: {[0m                                             
+  [0m     "name": [31m"Dog"[0m ,[0m                               | [0m     "name": [32m"Cat"[0m ,[0m                                
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [2]: {[0m                                            | [0m [2]: {[0m                                             
+  [0m     "[31mname[0m": [31m"Elephant"[0m,[0m                           | [0m     "[32mapple[0m": [32m"lusiancs"[0m,[0m                           
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m[0m                                                   | [0m[0m                                                    
+                                                     |                                                     
+
+nested JSONs with array differences
+"942a29ad1117489bc26adfa55f760b80431775a68c3e6b14fa330c4fdfc6c113 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "animal": {                                     |    "animal": {                                      
+         "name": "Cat",                              |        "name": "Cat",                               
+         "attributes": {                             |        "attributes": {                              
+             "color": [31m"black"[0m ,[0m                      |            "color": [32m"white"[0m ,[0m                       
+  [0m           "age": 5,[0m                               | [0m           "age": 5,[0m                                
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+different key-value pairs in nested JSON
+"025ed6cf861466ccc5332c1fab04824e93ec2cb230757a1ab0904043ae6be5ba A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "animals": {                                    |    "animals": {                                     
+         "wild": [                                   |        "wild": [                                    
+           [0]: [31m"Elephant"[0m[0m                           |          [0]: [32m"Lion"[0m[0m                                
+  [0m         [1]: [31m"Lion"[0m[0m                               | [0m         [1]: [32m"Elephant"[0m[0m                            
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m       "domestic": [[0m                               | [0m       "domestic": [[0m                                
+  [0m         [0]: [31m"Cat"[0m[0m                                | [0m         [0]: [32m"Dog"[0m[0m                                 
+  [0m         [1]: [31m"Dog"[0m[0m                                | [0m         [1]: [32m"Cat"[0m[0m                                 
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+nested arrays within objects
+"83058f9c21b01a272805827b35b527121b6c3b9a8189e3bded0fc269049c8121 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "level3": {                             |            "level3": {                              
+                 "name": [31m"Cat"[0m ,[0m                     |                "name": [32m"Dog"[0m ,[0m                      
+  [0m               "id": 3,[0m                            | [0m               "id": 3,[0m                             
+  [0m             }[0m                                     | [0m             }[0m                                      
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+three layered nested maps
+"748a984d11fa3e28ac12f17280043926cda016f4ed91b64c1fdfc378dc39840f A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "animal": {                                     |    "animal": {                                      
+         "name": "Cat",                              |        "name": "Cat",                               
+         "features": {                               |        "features": {                                
+             "[31mfurly[0m": [31m"short"[0m,[0m                       |            "tail": "long",                          
+  [0m           "tail": "long",[0m                         |            "[32mfur[0m": [32m"long"[0m,[0m                           
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+nested objects with different keys
+"e40b10192f58e3cc848e216beb7a9b4ad2cef79cb042e5a82310eac0cca41d56 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "zoo": {                                        |    "zoo": {                                         
+         "animals": [                                |        "animals": [                                 
+           [0]: {                                    |          [0]: {                                     
+               "type": "mammal",                     |              "type": "mammal",                      
+               "name": "Elephant",                   |              "name": "Elephant",                    
+               "age": 10,                            |              "age": 10,                             
+             }                                       |            }                                        
+           [1]: {                                    |          [1]: {                                     
+               "type": "bird",                       |              "type": "bird",                        
+               "name": "Parrot",                     |              "name": "Parrot",                      
+               "age": [31m2[0m ,[0m                            |              "age": [32m3[0m ,[0m                             
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+deeply nested mixed structures
+"7470cc614de3e68eb00d38f087b208d73822244dca550c3103caa61d7bc16f3f A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "family": {                                     |    "family": {                                      
+         "parents": [                                |        "parents": [                                 
+           [0]: {                                    |          [0]: {                                     
+               "name": [31m"Alice"[0m ,[0m                     |              "name": [32m"Bob"[0m ,[0m                        
+  [0m             "age": [31m40[0m ,[0m                           | [0m             "age": [32m42[0m ,[0m                            
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m         [1]: {[0m                                    | [0m         [1]: {[0m                                     
+  [0m             "name": [31m"Bob"[0m ,[0m                       | [0m             "name": [32m"Alice"[0m ,[0m                      
+  [0m             "age": [31m42[0m ,[0m                           | [0m             "age": [32m40[0m ,[0m                            
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m       "children": [[0m                               | [0m       "children": [[0m                                
+  [0m         [0]: {[0m                                    | [0m         [0]: {[0m                                     
+  [0m             "name": [31m"Charlie"[0m ,[0m                   | [0m             "name": [32m"Daisy"[0m ,[0m                      
+  [0m             "age": [31m10[0m ,[0m                           | [0m             "age": [32m8[0m ,[0m                             
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m         [1]: {[0m                                    | [0m         [1]: {[0m                                     
+  [0m             "name": [31m"Daisy"[0m ,[0m                     | [0m             "name": [32m"Charlie"[0m ,[0m                    
+  [0m             "age": [31m8[0m ,[0m                            | [0m             "age": [32m10[0m ,[0m                            
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+complex nested objects and arrays
+"8317e30c64967ec9a7d82332831630315a64ab03496dc11851984693ccc6ef3c A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+   [0]: {                                            |  [0]: {                                             
+       "title": "Book [31mA"[0m ,[0m                           |      "title": "Book [32mB"[0m ,[0m                            
+  [0m     "author": {[0m                                   | [0m     "author": {[0m                                    
+  [0m         "name": "Author [31m1"[0m ,[0m                      | [0m         "name": "Author [32m2"[0m ,[0m                       
+  [0m       }[0m                                           | [0m       }[0m                                            
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [1]: {[0m                                            | [0m [1]: {[0m                                             
+  [0m     "title": "Book [31mB"[0m ,[0m                           | [0m     "title": "Book [32mA"[0m ,[0m                            
+  [0m     "author": {[0m                                   | [0m     "author": {[0m                                    
+  [0m         "name": "Author [31m2"[0m ,[0m                      | [0m         "name": "Author [32m1"[0m ,[0m                       
+  [0m       }[0m                                           | [0m       }[0m                                            
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m[0m                                                   | [0m[0m                                                    
+                                                     |                                                     
+
+different arrays with nested objects
+"ef4dd42bb9dc629bbfade57743e72663c9a5d236c0e92cb4ce8c80e0d1304350 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+                                                     |                                                     
+  key1:[a b c]                                       | key1:[a b c]                                        
+                                                     |                                                     
+
+map containing array and string
+"a77a7d1602a82d778c027e6de0d17ac5d463128fd49c3736714cbd9a62f6c36d A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "outer": {                                      |    "outer": {                                       
+         "inner": [                                  |        "inner": [                                   
+           [0]: {                                    |          [0]: {                                     
+               "key": "value1",                      |              "key": "value1",                       
+             }                                       |            }                                        
+           [1]: {                                    |          [1]: {                                     
+               "key": [31m"value2"[0m ,[0m                     |              "key": [32m"value3"[0m ,[0m                      
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m       "array": [[0m                                  | [0m       "array": [[0m                                   
+  [0m         [0]: 1[0m                                    | [0m         [0]: 1[0m                                     
+  [0m         [1]: [31m2[0m[0m                                    | [0m         [1]: [32m3[0m[0m                                     
+  [0m         [2]: [31m3[0m[0m                                    | [0m         [2]: [32m2[0m[0m                                     
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+complex nested structures with maps and arrays
+"a46a95231b9cd0ad10bc0cfbaa15b106a626f028026f5fb1c04c277706dea4ba A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "value": [31m10[0m ,[0m                           |            "value": [32m20[0m ,[0m                            
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+nested maps with number differences
+"faa2ae50e03a03bd9b555d1422c9a62da0d8ab64bcaafa95d7da7a7f92ee0f5b A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "nested": {                                     |    "nested": {                                      
+         "key": [                                    |        "key": [                                     
+                                                     |          [0]: [32m{[0m                                     
+         ]                                           | [32m  "mapKey1": "value1"[0m                               
+       }                                             | [32m}[0m[0m                                                   
+   }                                                 | [0m         [1]: [32m{[0m                                     
+                                                     | [32m  "mapKey2": "value2"[0m                               
+                                                     | [32m}[0m[0m                                                   
+                                                     | [0m[0m                                                    
+                                                     | [0m       ][0m                                            
+                                                     | [0m     }[0m                                              
+                                                     | [0m }[0m                                                  
+                                                     |                                                     
+
+empty array to array of maps
+"3cf5725c92bc27fa26481d4c5a686beef5a240f963e42825b3b3da47925b2f99 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "nested": {                                     |    "nested": {                                      
+         "key": [                                    |        "key": [                                     
+                                                     |          [0]: [32m{[0m                                     
+         ]                                           | [32m  "mapKey1": "value1",[0m                              
+       }                                             | [32m  "mapKey2": [[0m                                      
+   }                                                 | [32m    1,[0m                                              
+                                                     | [32m    2,[0m                                              
+                                                     | [32m    {[0m                                               
+                                                     | [32m[33m.[0m                                                   
+                                                     | [33m.[0m                                                   
+                                                     | [33m.[0m[32m[0m                                                   
+                                                     | [32m  ],[0m                                                
+                                                     | [32m  "mapKey6": {[0m                                      
+                                                     | [32m    "innerKey2": "innerValue2"[0m                      
+                                                     | [32m  }[0m                                                 
+                                                     | [32m}[0m[0m                                                   
+                                                     | [0m[0m                                                    
+                                                     | [0m       ][0m                                            
+                                                     | [0m     }[0m                                              
+                                                     | [0m }[0m[0m                                                  
+                                                     |                                                     
+
+empty array to complex array of maps
+"3cf5725c92bc27fa26481d4c5a686beef5a240f963e42825b3b3da47925b2f99 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+                                                     |                                                     
+  {                                                  | {                                                   
+     "nested": {                                     |    "nested": {                                      
+         "key2": {                                   |        "key2": {                                    
+             "subkey2": [31m"value2"[0m ,[0m                   |            "subkey2": [32m"value3"[0m ,[0m                    
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m       "key1": {[0m                                   | [0m       "key1": {[0m                                    
+  [0m           "subkey1": "value1",[0m                    | [0m           "subkey1": "value1",[0m                     
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+long values and large JSON
+"038849cf6ea133ad62114f28063c2dd308c176d5b9fab6437e3b39ba41fd8c69 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "key1": [                               |            "key1": [                                
+                                                     |              [0]: [32m{[0m                                 
+             ]                                       | [32m  "subKey1": "value1"[0m                               
+           }                                         | [32m}[0m[0m                                                   
+       }                                             | [0m             [1]: [32m"string"[0m[0m                          
+   }                                                 | [0m             [2]: [32m123[0m[0m                               
+                                                     | [0m[0m                                                    
+                                                     | [0m           ][0m                                        
+                                                     | [0m         }[0m                                          
+                                                     | [0m     }[0m                                              
+                                                     | [0m }[0m                                                  
+                                                     |                                                     
+
+nested maps with changed array structures
+"1a608e86ae139515c23ba2b9d622fb9b3be6f7e0ab2d7bf36ab3de3f3503d605 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  -[31m [0m[31m"[0m[31ml[0m[31mo[0m[31mn[0m[31mg[0m[31mK[0m[31me[0m[31my[0m[31mW[0m[31mi[0m[31mt[0m[31mh[0m[31mS[0m[31mi[0m[31mm[0m[31mi[0m[31ml[0m[31ma[0m[31mr[0m[31mT[0m[31me[0m[31mx[0m[31mt[0m[31mB[0m[31mu[0m[31mt[0m[31mS[0m[31ml[0m[31mi[0m[31mg[0m[31mh[0m[31mt[0m[31ml[0m[31my[0m[31mD[0m[31mi[0m[31mf[0m[31mf[0m[31me[0m[31mr[0m[31me[0m[31mn[0m[31mt[0m[31mE[0m[31mn[0m[31md[0m[31mi[0m[31mn[0m[0m | +[32m [0m[32m"[0m[32ml[0m[32mo[0m[32mn[0m[32mg[0m[32mK[0m[32me[0m[32my[0m[32mW[0m[32mi[0m[32mt[0m[32mh[0m[32mS[0m[32mi[0m[32mm[0m[32mi[0m[32ml[0m[32ma[0m[32mr[0m[32mT[0m[32me[0m[32mx[0m[32mt[0m[32mB[0m[32mu[0m[32mt[0m[32mS[0m[32ml[0m[32mi[0m[32mg[0m[32mh[0m[32mt[0m[32ml[0m[32my[0m[32mD[0m[32mi[0m[32mf[0m[32mf[0m[32me[0m[32mr[0m[32me[0m[32mn[0m[32mt[0m[32mE[0m[32mn[0m[32md[0m[32mi[0m[32mn[0m[0m  
+  [0m[31mg[0m[31mA[0m[31m"[0m: value1[0m                                        | [0m[32mg[0m[32mB[0m[32m"[0m: value1[0m                                         
+                                                     |                                                     
+
+long keys with subtle changes
+"4df8308831c7811a06699d7c236e724f8e3248aace687b99bbe1f14c417a8c06 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+                                                     |                                                     
+                                                     |                                                     
+
+long paragraphs with a random word change
+"1feca3daff06d95968da75db1b7748a70404e853b8877e9af86ca13b4fcc0d49 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "nested": {                                     |    "nested": {                                      
+         "key": [                                    |        "key": [                                     
+                                                     |          [0]: [32m{[0m                                     
+         ]                                           | [32m  "mapKey1": "value1",[0m                              
+       }                                             | [32m  "mapKey2": [[0m                                      
+   }                                                 | [32m    1,[0m                                              
+                                                     | [32m    2,[0m                                              
+                                                     | [32m    {[0m                                               
+                                                     | [32m[33m.[0m                                                   
+                                                     | [33m.[0m                                                   
+                                                     | [33m.[0m[32m[0m                                                   
+                                                     | [32m  ],[0m                                                
+                                                     | [32m  "mapKey6": {[0m                                      
+                                                     | [32m    "innerKey2": "innerValue2"[0m                      
+                                                     | [32m  }[0m                                                 
+                                                     | [32m}[0m[0m                                                   
+                                                     | [0m[0m                                                    
+                                                     | [0m       ][0m                                            
+                                                     | [0m     }[0m                                              
+                                                     | [0m }[0m[0m                                                  
+                                                     |                                                     
+
+empty array to complex array of maps with subtle changes
+"3cf5725c92bc27fa26481d4c5a686beef5a240f963e42825b3b3da47925b2f99 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+                                                     |                                                     
+                                                     |                                                     
+
+long values with subtle changes and long paragraphs
+"1feca3daff06d95968da75db1b7748a70404e853b8877e9af86ca13b4fcc0d49 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "key1": [                               |            "key1": [                                
+                                                     |              [0]: [32m{[0m                                 
+             ]                                       | [32m  "subKey1": "value1"[0m                               
+           }                                         | [32m}[0m[0m                                                   
+       }                                             | [0m             [1]: [32m"string"[0m[0m                          
+   }                                                 | [0m             [2]: [32m123[0m[0m                               
+                                                     | [0m[0m                                                    
+                                                     | [0m           ][0m                                        
+                                                     | [0m         }[0m                                          
+                                                     | [0m     }[0m                                              
+                                                     | [0m }[0m                                                  
+                                                     |                                                     
+
+nested maps with changed array structures
+"1a608e86ae139515c23ba2b9d622fb9b3be6f7e0ab2d7bf36ab3de3f3503d605 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "level3": {                             |            "level3": {                              
+                 "longKey": [31m"eyJhbGciOiJIUzI1NiIsInR[0m |                "longKey": [32m"This[0m is a very long val[0m  
+  [31mcCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJmaXJzdE5hbWUiO[0m | [0me with many descriptive words and phrases to make [0m  
+  [31m[33m.[0m                                                  | [0mt [32mextensive."[0m ,[0m                                     
+  [33m.[0m                                                  | [0m             }[0m                                      
+  [33m.[0m[31m[0m                                                  | [0m         }[0m                                          
+  [31m7M_QQP5Gn9q4suRYEF7_n4ITqehV4i7t_s[0m is a very long [0m | [0m     }[0m                                              
+  [0malue with many descriptive words and phrases to ma[0m | [0m }[0m                                                  
+  [0me it [31mlengthy."[0m ,[0m                                   |                                                     
+  [0m             }[0m                                     |                                                     
+  [0m         }[0m                                         |                                                     
+  [0m     }[0m                                             |                                                     
+  [0m }[0m[0m                                                 |                                                     
+                                                     |                                                     
+
+complex nested maps with arrays and long values
+"63997b1efe697a365d49ddd6c835051580b94bac43f8c5ad11ffd0b687bdaf71 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "nested": {                                     |    "nested": {                                      
+         "key": [                                    |        "key": [                                     
+                                                     |          [0]: [32m{[0m                                     
+         ]                                           | [32m  "mapKey1": "value1",[0m                              
+       }                                             | [32m  "mapKey2": [[0m                                      
+   }                                                 | [32m    {[0m                                               
+                                                     | [32m      "subKey1": "value2"[0m                           
+                                                     | [32m    },[0m                                              
+                                                     | [32m[33m.[0m                                                   
+                                                     | [33m.[0m                                                   
+                                                     | [33m.[0m[32m[0m                                                   
+                                                     | [32m  ],[0m                                                
+                                                     | [32m  "mapKey6": {[0m                                      
+                                                     | [32m    "innerKey2": "innerValue2"[0m                      
+                                                     | [32m  }[0m                                                 
+                                                     | [32m}[0m[0m                                                   
+                                                     | [0m[0m                                                    
+                                                     | [0m       ][0m                                            
+                                                     | [0m     }[0m                                              
+                                                     | [0m }[0m[0m                                                  
+                                                     |                                                     
+
+empty array to array of maps with complex nested structures
+"3cf5725c92bc27fa26481d4c5a686beef5a240f963e42825b3b3da47925b2f99 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "level3": {                             |            "level3": {                              
+                 "[31mlongKeyWithMinorChangeA[0m": [31m"This is[0m |                "[32mlongKeyWithMinorChangeB[0m": [32m"This is[0m  
+  [31ma very long value that remains mostly the same."[0m,[0m  | [32ma very long value that remains mostly the same."[0m,[0m   
+  [0m             }[0m                                     | [0m             }[0m                                      
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+long nested structures with slight key changes
+"b0d3af312d652a356588bdcddd6f8560cd7700e3532f69405df5dd555b9b1516 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+                                                     |                                                     
+
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "nested": {                                     |    "nested": {                                      
+         "longParagraph": "This is a long paragraph. |        "longParagraph": "This is a long paragraph.  
+  It contains multiple sentences. Each sentence has  | It contains multiple sentences. Each sentence has   
+  any words. One [31msentence[0m will be different in the s[0m | any words. One [32mphrase[0m will be different in the sec[0m  
+  [0mcond JSON." ,[0m                                      | [0mnd JSON." ,[0m                                         
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+long paragraphs with nested arrays and maps
+"67e2232cc42a9f92d7c6871d33a768ed9f7858eb22a00a52f593c1b163eced21 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "key1": [                               |            "key1": [                                
+               [0]: {                                |              [0]: {                                 
+                   "subKey1": "value1",              |                  "subKey1": "value1",               
+                 }                                   |                }                                    
+               [1]: {                                |              [1]: {                                 
+                   "subKey2": [31m"value2"[0m ,[0m             |                  "subKey2": [32m"value3"[0m ,[0m              
+  [0m               }[0m                                   | [0m               }[0m                                    
+  [0m             [2]: string[0m                           | [0m             [2]: string[0m                            
+  [0m             [3]: 123[0m                              | [0m             [3]: 123[0m                               
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m           ][0m                                       | [0m           ][0m                                        
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+complex nested structures with arrays and subtle changes
+"145743bd1d40fde4a2ed7c04caf37c0d2158586af7494274b7cabc2457de320a A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "[31mname[0m": [31m"Cat"[0m,[0m                          |            "id": 3,                                 
+  [0m           "id": 3,[0m                                |            "[32manimal[0m": [32m"Cat"[0m,[0m                         
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+random key change in nested JSON
+"7191b707a2942a7e6481cad7e809dfc8df2ee22433f3f5b94d90285792d2f29b A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+   [0]: {                                            |  [0]: {                                             
+       "[31mname[0m": [31m"Cat"[0m,[0m                                |      "[32mtype[0m": [32m"Cat"[0m,[0m                                 
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [1]: {[0m                                            | [0m [1]: {[0m                                             
+  [0m     "name": "Dog",[0m                                | [0m     "name": "Dog",[0m                                 
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m [2]: {[0m                                            | [0m [2]: {[0m                                             
+  [0m     "name": "Elephant",[0m                           | [0m     "name": "Elephant",[0m                            
+  [0m   }[0m                                               | [0m   }[0m                                                
+  [0m[0m                                                   | [0m[0m                                                    
+                                                     |                                                     
+
+nested JSON with random key change
+"d1945cdf068b25eedbaf97164ad20c3d40ef8ce2933d1f68bfcf4ecf1024a0f9 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "level3": {                             |            "level3": {                              
+                 "id": 3,                            |                "id": 3,                             
+                 "[31mname[0m": [31m"Cat"[0m,[0m                      |                "[32mspecies[0m": [32m"Cat"[0m,[0m                    
+  [0m             }[0m                                     | [0m             }[0m                                      
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+deeply nested JSON with random key change
+"e7acdd0c2e10556a15abb14168a97a6a601ce13852cd860eb38737d8ea73101d A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  key1:[a b c]                                       | key1:[a b c]                                        
+  -[31m [0m[31m"[0m[31mk[0m[31me[0m[31my[0m[31m2[0m[31m"[0m: value1[0m                                   | +[32m [0m[32m"[0m[32mk[0m[32me[0m[32my[0m[32mX[0m[32m"[0m: value1[0m                                    
+                                                     |                                                     
+
+random key change in map containing array
+"2bb2ce1e640717c6f57c428888bfcde932302e473c9d6ea6293e155178096bc5 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "animal": {                                     |    "animal": {                                      
+         "[31mattributes[0m": [31m{[0m                             |        "name": "Cat",                               
+  [31m  "age": 5,[0m                                        |        "[32mcharacteristics[0m": [32m{[0m                         
+  [31m  "color": "black"[0m                                 | [32m  "age": 5,[0m                                         
+  [31m}[0m,[0m                                                 | [32m  "color": "black"[0m                                  
+  [0m       "name": "Cat",[0m                              | [32m}[0m,[0m                                                  
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+random key change in nested objects
+"cc1d6ab9fd7c8cf07fbf85a1710eab59ebc861f4da193cafbdcfe7784ebf22d2 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "level1": {                                     |    "level1": {                                      
+         "level2": {                                 |        "level2": {                                  
+             "key1": {                               |            "key1": {                                
+                 "[31msubKey[0m": [31m"value"[0m,[0m                  |                "[32mattribute[0m": [32m"value"[0m,[0m                
+  [0m             }[0m                                     | [0m             }[0m                                      
+  [0m         }[0m                                         | [0m         }[0m                                          
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+nested maps with random key change
+"7c374d4beb8fb298a29b5c0b99e2702643281e9f5d45bbb32b3f2dc9f02b5a00 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+                                                     |  [0]: [32m"Vary"[0m[0m                                        
+                                                     | [0m[0m                                                    
+                                                     |                                                     
+
+random key change in complex nested structures
+"1feca3daff06d95968da75db1b7748a70404e853b8877e9af86ca13b4fcc0d49 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  {                                                  | {                                                   
+     "zoo": {                                        |    "zoo": {                                         
+         "animals": [                                |        "animals": [                                 
+           [0]: {                                    |          [0]: {                                     
+               "[31mtype[0m": [31m"mammal"[0m,[0m                     |              "name": "Elephant",                    
+  [0m             "name": "Elephant",[0m                   |              "age": 10,                             
+  [0m             "age": 10,[0m                            |              "[32mspecies[0m": [32m"mammal"[0m,[0m                   
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m         [1]: {[0m                                    | [0m         [1]: {[0m                                     
+  [0m             "type": "bird",[0m                       | [0m             "type": "bird",[0m                        
+  [0m             "name": "Parrot",[0m                     | [0m             "name": "Parrot",[0m                      
+  [0m             "age": 2,[0m                             | [0m             "age": 2,[0m                              
+  [0m           }[0m                                       | [0m           }[0m                                        
+  [0m[0m                                                   | [0m[0m                                                    
+  [0m       ][0m                                           | [0m       ][0m                                            
+  [0m     }[0m                                             | [0m     }[0m                                              
+  [0m }[0m                                                 | [0m }[0m                                                  
+                                                     |                                                     
+
+random key change in deeply nested mixed structures
+"912c9262d67b66c88213a4852e320d9b8510756699fe6ee449ee88dbf8426194 A",
+                        EXPECT                       |                       ACTUAL                        
+-----------------------------------------------------+-----------------------------------------------------
+  Vary: [91m[0m [0m                                            | Vary: [92mOrigin[0m [0m                                       
+  [0mEtag: [91mW/"1c0-4VkjzPwyKEH0Xy9lGO28f/cyPk4"[0m [0m         | [0mEtag: [92mW/"1c0-8j/k9MOCbWGtKgVesjFGmY6dEAs"[0m [0m          
+                                                     |                                                     
+
+Changing the header
+"5ef46a7cd59f265b49c304dd1795b4e373198d7fec18ba05baff302c6f4f8d04 A",
+PASS
+ok  	go.keploy.io/jsondiff	0.050s
