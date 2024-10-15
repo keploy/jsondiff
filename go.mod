@@ -1,4 +1,4 @@
-module go.keploy.io/jsondiff
+module github.com/keploy/jsonDiff
 
 go 1.22
 
