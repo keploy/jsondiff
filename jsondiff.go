@@ -25,6 +25,7 @@ type Diff struct {
 	Actual   string
 }
 
+//function 
 func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]string, disableColor bool) (Diff, error) {
 	color.NoColor = disableColor
 	// Calculate the differences between the two JSON objects.
@@ -58,17 +59,26 @@ func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]stri
 // expectedJSON: The JSON string containing the expected values.
 // actualJSON: The JSON string containing the actual values.
 // Returns a Diff struct containing the colorized differences for the expected and actual JSON responses.
-func Compare(expectedJSON, actualJSON string) Diff {
+func Compare(expectedJSON, actualJSON string, disableColor bool) Diff {
 	// Calculate the ranges for differences between the expected and actual JSON strings.
-	offsetExpected, offsetActual, _ := diffArrayRange(expectedJSON, actualJSON)
+		offsetExpected, offsetActual, _ := diffArrayRange(expectedJSON, actualJSON)
+		
+	// Define variables for the colorized strings
+		var colorizedExpected, colorizedActual string
 
-	// Define colors for highlighting differences.
-	highlightExpected := color.FgHiRed
-	highlightActual := color.FgHiGreen
+		if disableColor {
+			// If color is disabled, return the JSON strings as they are
+			colorizedExpected = expectedJSON
+			colorizedActual = actualJSON
+		} else {
+			// Define colors for highlighting differences.
+			highlightExpected := color.FgHiRed
+			highlightActual := color.FgHiGreen
 
-	// Colorize the differences in the expected and actual JSON strings.
-	colorizedExpected := breakSliceWithColor(expectedJSON, &highlightExpected, offsetExpected)
-	colorizedActual := breakSliceWithColor(actualJSON, &highlightActual, offsetActual)
+			// Colorize the differences in the expected and actual JSON strings.
+			colorizedExpected = breakSliceWithColor(expectedJSON, &highlightExpected, offsetExpected)
+			colorizedActual = breakSliceWithColor(actualJSON, &highlightActual, offsetActual)
+		}
 
 	// Return the colorized differences in a Diff struct.
 	return Diff{
@@ -725,29 +735,30 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 // expect: The map containing the expected header values.
 // actual: The map containing the actual header values.
 // Returns a ColorizedResponse containing the colorized differences for the expected and actual headers.
-func CompareHeaders(expectedHeaders, actualHeaders map[string]string) Diff {
-	var expectAll, actualAll strings.Builder // Builders for the resulting strings.
+func CompareHeaders(expectedHeaders, actualHeaders map[string]string, options ...bool) Diff {
+	disableColor := false
+	if len(options) > 0 {
+		disableColor = options[0]
+	}
 
-	// Iterate over each key-value pair in the expected map.
+	var expectAll, actualAll strings.Builder
 	for key, expValue := range expectedHeaders {
-		actValue := actualHeaders[key] // Get the corresponding value from the actual map.
-
-		// Calculate the offsets of the differences between the expected and actual values.
+		actValue := actualHeaders[key]
 		offsetsStr1, offsetsStr2, _ := diffArrayRange(string(expValue), string(actValue))
-
-		// Define colors for highlighting differences.
-		cE, cA := color.FgHiRed, color.FgHiGreen
-
-		// Colorize the differences in the expected and actual values.
-		expectDiff := key + ": " + breakSliceWithColor(string(expValue), &cE, offsetsStr1)
-		actualDiff := key + ": " + breakSliceWithColor(string(actValue), &cA, offsetsStr2)
-
-		// Add the colorized differences to the builders.
+		
+		var expectDiff, actualDiff string
+		if disableColor {
+			expectDiff = key + ": " + string(expValue)
+			actualDiff = key + ": " + string(actValue)
+		} else {
+			cE, cA := color.FgHiRed, color.FgHiGreen
+			expectDiff = key + ": " + breakSliceWithColor(string(expValue), &cE, offsetsStr1)
+			actualDiff = key + ": " + breakSliceWithColor(string(actValue), &cA, offsetsStr2)
+		}
+		
 		expectAll.WriteString(breakLines(expectDiff) + "\n")
 		actualAll.WriteString(breakLines(actualDiff) + "\n")
 	}
-
-	// Return the resulting strings.
 	return Diff{Expected: expectAll.String(), Actual: actualAll.String()}
 }
 
