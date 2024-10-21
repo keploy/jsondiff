@@ -25,35 +25,46 @@ type Diff struct {
 	Actual   string
 }
 
-//function 
+// CompareJSON compares two JSON objects (expectedJSON and actualJSON) and returns a Diff structure.
+// It takes into account specific keys that are noisy or irrelevant, specified in the 'noise' parameter.
+// If 'disableColor' is true, the colorization of the output will be disabled.
+// The function calculates the differences between the JSON objects, and if modified keys exist in the provided maps,
+// it adds additional context to the diff. It then separates and optionally colorizes the diff output into expected and actual parts.
+// Returns a Diff struct containing the expected and actual differences, or an error if any issue arises.
 func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]string, disableColor bool) (Diff, error) {
-	color.NoColor = disableColor
-	// Calculate the differences between the two JSON objects.
-	diffString, err := calculateJSONDiffs(expectedJSON, actualJSON)
-	if err != nil || diffString == "" {
-		return Diff{}, err
-	}
-	// Extract the modified keys from the diff string.
-	modifiedKeys := extractKey(diffString)
+    // Disable or enable colorization of output based on 'disableColor' parameter.
+    color.NoColor = disableColor
 
-	// Check if the modified keys exist in the provided maps and add additional context if they do.
-	contextInfo, exists, error := checkKeyInMaps(expectedJSON, actualJSON, modifiedKeys)
+    // Calculate the differences between the two JSON objects.
+    diffString, err := calculateJSONDiffs(expectedJSON, actualJSON)
+    if err != nil || diffString == "" {
+        return Diff{}, err
+    }
 
-	if error != nil {
-		return Diff{}, error
-	}
+    // Extract the modified keys from the generated diff string.
+    modifiedKeys := extractKey(diffString)
 
-	if exists {
-		diffString = contextInfo + "\n" + diffString
-	}
-	// Separate and colorize the diff string into expected and actual outputs.
-	expect, actual := separateAndColorize(diffString, noise)
+    // Check if the modified keys exist in the provided maps and add additional context if they do.
+    contextInfo, exists, error := checkKeyInMaps(expectedJSON, actualJSON, modifiedKeys)
+    if error != nil {
+        return Diff{}, error
+    }
 
-	return Diff{
-		Expected: expect,
-		Actual:   actual,
-	}, nil
+    // If relevant keys exist, prepend the context information to the diff string.
+    if exists {
+        diffString = contextInfo + "\n" + diffString
+    }
+
+    // Separate and optionally colorize the diff string into expected and actual outputs.
+    expect, actual := separateAndColorize(diffString, noise)
+
+    // Return a Diff struct containing the expected and actual differences.
+    return Diff{
+        Expected: expect,
+        Actual:   actual,
+    }, nil
 }
+
 
 // Compare takes expected and actual JSON strings and returns the colorized differences.
 // expectedJSON: The JSON string containing the expected values.
@@ -732,35 +743,62 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 }
 
 // CompareHeaders compares the headers of the expected and actual maps and returns the differences as colorized strings.
-// expect: The map containing the expected header values.
-// actual: The map containing the actual header values.
-// Returns a ColorizedResponse containing the colorized differences for the expected and actual headers.
-func CompareHeaders(expectedHeaders, actualHeaders map[string]string, options ...bool) Diff {
-	disableColor := false
-	if len(options) > 0 {
-		disableColor = options[0]
-	}
+// It compares the values of the headers with the same keys from both maps and highlights the differences.
+// - expectedHeaders: A map containing the expected header values.
+// - actualHeaders: A map containing the actual header values.
+// - options: A variadic array of interfaces to pass additional parameters (e.g., disableColor as a bool).
+//            - If a bool is passed, it will determine whether to disable colorization (true means colorization is disabled).
+//            - Additional parameters could be added in the future without changing the function signature.
+// Returns a Diff struct containing colorized (or plain) differences in the expected and actual headers.
+func CompareHeaders(expectedHeaders, actualHeaders map[string]string, options ...interface{}) Diff {
+    // Default value for disabling colorization (false means colorization is enabled).
+    disableColor := false
 
-	var expectAll, actualAll strings.Builder
-	for key, expValue := range expectedHeaders {
-		actValue := actualHeaders[key]
-		offsetsStr1, offsetsStr2, _ := diffArrayRange(string(expValue), string(actValue))
-		
-		var expectDiff, actualDiff string
-		if disableColor {
-			expectDiff = key + ": " + string(expValue)
-			actualDiff = key + ": " + string(actValue)
-		} else {
-			cE, cA := color.FgHiRed, color.FgHiGreen
-			expectDiff = key + ": " + breakSliceWithColor(string(expValue), &cE, offsetsStr1)
-			actualDiff = key + ": " + breakSliceWithColor(string(actValue), &cA, offsetsStr2)
-		}
-		
-		expectAll.WriteString(breakLines(expectDiff) + "\n")
-		actualAll.WriteString(breakLines(actualDiff) + "\n")
-	}
-	return Diff{Expected: expectAll.String(), Actual: actualAll.String()}
+    // Parse options: currently, we only handle disabling colorization.
+    for _, option := range options {
+        switch v := option.(type) {
+        case bool:
+            disableColor = v // If a boolean is passed, treat it as a flag to disable colorization.
+        // Additional option types can be handled here in the future.
+        }
+    }
+
+    // Initialize string builders to store the final expected and actual header strings.
+    var expectAll, actualAll strings.Builder
+
+    // Iterate over each key-value pair in the expected headers map.
+    for key, expValue := range expectedHeaders {
+        // Retrieve the corresponding actual value from the actual headers map.
+        actValue := actualHeaders[key]
+
+        // Calculate the differences (ranges of mismatches) between the expected and actual header values.
+        offsetsStr1, offsetsStr2, _ := diffArrayRange(string(expValue), string(actValue))
+
+        var expectDiff, actualDiff string
+
+        // If colorization is disabled, simply concatenate the key and its corresponding header value.
+        if disableColor {
+            expectDiff = key + ": " + string(expValue)
+            actualDiff = key + ": " + string(actValue)
+        } else {
+            // Colorize the differences using different colors for expected (red) and actual (green) values.
+            cE, cA := color.FgHiRed, color.FgHiGreen
+            expectDiff = key + ": " + breakSliceWithColor(string(expValue), &cE, offsetsStr1)
+            actualDiff = key + ": " + breakSliceWithColor(string(actValue), &cA, offsetsStr2)
+        }
+
+        // Break the differences into lines and append them to the string builders.
+        expectAll.WriteString(breakLines(expectDiff) + "\n")
+        actualAll.WriteString(breakLines(actualDiff) + "\n")
+    }
+
+    // Return the Diff struct containing the final strings of expected and actual header differences.
+    return Diff{
+        Expected: expectAll.String(),
+        Actual:   actualAll.String(),
+    }
 }
+
 
 // breakSliceWithColor breaks the input string into slices and applies color to specified offsets.
 // s: The input string to be processed.
