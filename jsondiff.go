@@ -807,7 +807,7 @@ func CompareHeaders(expectedHeaders, actualHeaders map[string]string, options ..
             actualAll.WriteString(fmt.Sprintf("%s: %s\n", key, actValue))
         }
     }
-
+    
     // Check for additional headers in actual that weren't in expected
     for key, actValue := range actualHeaders {
         if _, exists := expectedHeaders[key]; !exists {
