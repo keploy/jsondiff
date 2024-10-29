@@ -677,8 +677,6 @@ func TestSprintJSONDiff(t *testing.T) {
 				println(tt.name)
 				fmt.Printf("\"%s %s \",\n", escapedB, "B")
 				t.Fail() // Mark the test as failed
-			} else {
-				println(result)
 			}
 
 		})
