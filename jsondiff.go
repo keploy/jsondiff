@@ -420,7 +420,12 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 
 			if expectValue != nil && actualValue != nil {
 				var expectBuilder, actualBuilder strings.Builder
-				compare(expectKey[:len(expectKey)-1], expectValue, actualValue, " ", &expectBuilder, &actualBuilder, red, green)
+				if expectKey != actualKey {
+					actualBuilder.WriteString(fmt.Sprintf("%s: %s\n", green(serialize(actualKey[:len(actualKey)-1])), actualValue))
+					expectBuilder.WriteString(fmt.Sprintf("%s: %s\n", red(serialize(expectKey[:len(expectKey)-1])), expectValue))
+				} else {
+					compare(expectKey[:len(expectKey)-1], expectValue, actualValue, " ", &expectBuilder, &actualBuilder, red, green)
+				}
 				expectedText = expectBuilder.String()
 				actualText = actualBuilder.String()
 			} else if !isExpectMap || !isActualMap {
@@ -515,8 +520,8 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 	}
 
 	// Adding Closing Brackets
-	expect += "}"
-	actual += "}"
+	expect += " }\n"
+	actual += " }\n"
 	// Return the accumulated expected and actual strings.
 	return expect, actual
 }
