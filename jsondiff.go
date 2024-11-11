@@ -365,9 +365,15 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 	actualMap := make(map[string]interface{}, 0)
 	expectsArray := make([]interface{}, 0)
 	actualsArray := make([]interface{}, 0)
+	// For Data Types other than maps and slices
+	var expectValue interface{}
+	var actualValue interface{}
 	var isExpectMap, isActualMap bool
 	expect, actual := "", ""
 
+	// Adding Open Brackets
+	expect += "{\n"
+	actual += "{\n"
 	// Iterate over the lines, processing each line and the next line together.
 	for i := 0; i < len(lines)-1; i++ {
 		var expectKey, actualKey string
@@ -387,6 +393,8 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 					isActualMap = true
 					actualMap = map[string]interface{}{actualKey[:len(actualKey)-1]: jsonObj}
 				case json.Unmarshal([]byte(value), &actualsArray) == nil:
+				default:
+					actualValue = value
 				}
 
 			}
@@ -401,31 +409,48 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 					isExpectMap = true
 					expectMap = map[string]interface{}{expectKey[:len(expectKey)-1]: jsonObj}
 				case json.Unmarshal([]byte(value), &expectsArray) == nil:
+				default:
+					expectValue = value
 				}
 			}
 			// Define color functions for red and green.
 			red := color.New(color.FgRed).SprintFunc()
 			green := color.New(color.FgGreen).SprintFunc()
 			var expectedText, actualText string
-			// Compare and colorize maps or arrays.
-			if !isExpectMap || !isActualMap {
+
+			if expectValue != nil && actualValue != nil {
+				var expectBuilder, actualBuilder strings.Builder
+				if expectKey != actualKey {
+					actualBuilder.WriteString(fmt.Sprintf("%s: %s\n", green(serialize(actualKey[:len(actualKey)-1])), actualValue))
+					expectBuilder.WriteString(fmt.Sprintf("%s: %s\n", red(serialize(expectKey[:len(expectKey)-1])), expectValue))
+				} else {
+					compare(expectKey[:len(expectKey)-1], expectValue, actualValue, " ", &expectBuilder, &actualBuilder, red, green)
+				}
+				expectedText = expectBuilder.String()
+				actualText = actualBuilder.String()
+			} else if !isExpectMap || !isActualMap {
 				if actualKey != expectKey {
 					continue
 				}
 				expectedText, actualText = compareAndColorizeSlices(expectsArray, actualsArray, " ", red, green)
-			}
-
-			if isExpectMap && isActualMap {
+			} else if isExpectMap && isActualMap {
 				expectedText, actualText = compareAndColorizeMaps(expectMap, actualMap, " ", red, green)
+				// Removing extra { and } from the expected and actual text.
+				expectedText = expectedText[2 : len(expectedText)-2]
+				actualText = actualText[2 : len(actualText)-2]
 			}
 
 			// Truncate and break lines to match with ellipsis.
 			expectOutput, actualOutput := truncateToMatchWithEllipsis(breakLines(expectedText), breakLines(actualText))
-			expect += breakLines(expectOutput) + "\n"
-			actual += breakLines(actualOutput) + "\n"
+			expect += breakLines(expectOutput)
+			actual += breakLines(actualOutput)
 			// Reset maps for the next iteration.
 			expectMap = make(map[string]interface{}, 0)
 			actualMap = make(map[string]interface{}, 0)
+
+			// Reset Values
+			expectValue = nil
+			actualValue = nil
 
 			// Remove processed lines from diffStr.
 			diffStr = strings.Replace(diffStr, line, "", 1)
@@ -494,6 +519,9 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 
 	}
 
+	// Adding Closing Brackets
+	expect += " }\n"
+	actual += " }\n"
 	// Return the accumulated expected and actual strings.
 	return expect, actual
 }
