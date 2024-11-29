@@ -35,16 +35,21 @@ func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]stri
 	// Extract the modified keys from the diff string.
 	modifiedKeys := extractKey(diffString)
 
-	// Check if the modified keys exist in the provided maps and add additional context if they do.
-	contextInfo, exists, error := checkKeyInMaps(expectedJSON, actualJSON, modifiedKeys)
+	t := reflect.TypeOf(expectedJSON)
 
-	if error != nil {
-		return Diff{}, error
+	if t.Kind() == reflect.Map {
+		// Check if the modified keys exist in the provided maps and add additional context if they do.
+		contextInfo, exists, error := checkKeyInMaps(expectedJSON, actualJSON, modifiedKeys)
+
+		if error != nil {
+			return Diff{}, error
+		}
+
+		if exists {
+			diffString = contextInfo + "\n" + diffString
+		}
 	}
 
-	if exists {
-		diffString = contextInfo + "\n" + diffString
-	}
 	// Separate and colorize the diff string into expected and actual outputs.
 	expect, actual := separateAndColorize(diffString, noise)
 
