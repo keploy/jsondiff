@@ -145,6 +145,7 @@ func TestSprintJSONDiff(t *testing.T) {
 				"fa012aa280e519ccb558663c5728faea94ed020988c83653a796926c35902ec0",
 				"ef0a5b31ffc0a36df02dcc08898cad0b92857cd1405cad0feefc18d888bf57d0",
 				"e0236118ff8532288842ad67be5bca9f81b15191ee2efc2eee077406fabf8bbd",
+				"c828a0590dbd6e6eefbee21c5855b19a8bff98930f0219816fe6f24c3705c5cb",
 			},
 			expectedStringB: []string{
 				"d79b35acf01b0f5138699ff1cc49ea89373b8ebf7e96118b839586a28c28bbee",
@@ -152,6 +153,7 @@ func TestSprintJSONDiff(t *testing.T) {
 				"e765848380611cb81996ea9908ade2ee8940c21d72a84fd19ce1d1d6ddfa8e2a",
 				"001ff4d6bf9821bb067c73812ba5900574dd161d813f10623ba2515fdbed0f88",
 				"19018c74ffe402eb59202aadc1cab4f5c8171c96ba50f4621ab9d72f3b18914e",
+				"0bd78116662eba5d4fa8bbc64f81afbd879fb2e73cd6d85105e1f9bf3a658ae0",
 			},
 			json1: "{\"books\":[{\"title\":\"Book A\",\"author\":{\"name\":\"Author 1\"}},{\"title\":\"Book B\",\"author\":{\"name\":\"Author 2\"}}]}",
 			json2: "{\"books\":[{\"title\":\"Book B\",\"author\":{\"name\":\"Author 2\"}},{\"title\":\"Book A\",\"author\":{\"name\":\"Author 1\"}}]}",
@@ -160,9 +162,11 @@ func TestSprintJSONDiff(t *testing.T) {
 		{
 			expectedStringA: []string{
 				"83a2bdc32cf3b2ecba06bf4ef3c4bb11d6219a8ade62a1026667616221f4343b",
+				"a717fd9c62ccea2df24835e9db8cb99f8af3ebddc352a758dc55750e272f5a2b",
 			},
 			expectedStringB: []string{
 				"847155ec0ab7092a7ed5a91b01073f736a03c7e5c0b2c61ea9daeb89fdb680ef",
+				"4baa4c73af6838aabe1796bce3a0ea547d4d5efa4bd630cbeeafd82003b0163b",
 			},
 			json1: "{\"key1\": [\"a\", \"b\", \"c\"], \"key2\": \"value1\"}",
 			json2: "{\"key1\": [\"a\", \"b\", \"c\"], \"key2\": \"value2\"}",
@@ -351,6 +355,7 @@ func TestSprintJSONDiff(t *testing.T) {
 				"ef0a5b31ffc0a36df02dcc08898cad0b92857cd1405cad0feefc18d888bf57d0",
 				"f71cbcb39804b502c41125d03be6c699baafa15efba8bbb5aef0b111039b2a87",
 				"e0236118ff8532288842ad67be5bca9f81b15191ee2efc2eee077406fabf8bbd",
+				"17f1dc518cda544ae5ff4b2479e94d5ef811e542b387608dfe7b44e42937e452",
 			},
 			expectedStringB: []string{
 				"8fe4e8830eb84cdacd2cbd60f62fc5d50dcecf3a5cc439ea7e24d87d4257c6a8",
@@ -358,6 +363,7 @@ func TestSprintJSONDiff(t *testing.T) {
 				"d79b35acf01b0f5138699ff1cc49ea89373b8ebf7e96118b839586a28c28bbee",
 				"001ff4d6bf9821bb067c73812ba5900574dd161d813f10623ba2515fdbed0f88",
 				"19018c74ffe402eb59202aadc1cab4f5c8171c96ba50f4621ab9d72f3b18914e",
+				"d11e6a5e5047d70f5e5633650bc4b3fd7a588d126fb785e5ac42b92fbf3e44f6",
 			},
 			json1: "{\"books\":[{\"title\":\"Book A\",\"author\":{\"name\":\"Author 1\"}},{\"title\":\"Book B\",\"author\":{\"name\":\"Author 2\"}}]}",
 			json2: "{\"books\":[{\"title\":\"Book B\",\"author\":{\"name\":\"Author 2\"}},{\"title\":\"Book A\",\"author\":{\"name\":\"Author 1\"}}]}",
@@ -592,11 +598,13 @@ func TestSprintJSONDiff(t *testing.T) {
 				"62ab6013fda48a72966106d362aea4458dc3605d09ee619bddcef68b445b91ce",
 				"2bb2ce1e640717c6f57c428888bfcde932302e473c9d6ea6293e155178096bc5",
 				"e16149ca0595b6d8459d197ae2c84abf0129a5c8c822caaa76b01b3b4919f97d",
+				"8c0756121991a25e2386ab0010234b5e6c20be0517e6412094bff81310491cc8",
 			},
 			expectedStringB: []string{
 				"10c489902f9c50cbad5129747c2083d0790e1df4ca20fb0908d93babe5b18cb6",
 				"dfa379a98168c811f09af24ea1906f2b27d29b043aa1725ae490dac3549a7b62",
 				"ac8a2cd48569a3b359fb7b277cea619196c9b88163542be661e009fa2afc4ff0",
+				"ce556ba29ec5c2fd797fed1fca04e672e1513b858caab473ad9ac5f0cbb52a91",
 			},
 			json1: "{\"key1\": [\"a\", \"b\", \"c\"], \"key2\": \"value1\"}",
 			json2: "{\"key1\": [\"a\", \"b\", \"c\"], \"keyX\": \"value1\"}",
