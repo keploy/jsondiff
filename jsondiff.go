@@ -406,6 +406,12 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				actualTrimmedLine := nextLine[3:] // Trim the '+ ' prefix from the next line.
 				actualKeyValue := strings.SplitN(actualTrimmedLine, ":", 2)
 				actualKey = strings.TrimSpace(actualKeyValue[0])
+				isNoised := checkNoise(actualKey, noise)
+
+				if isNoised {
+					continue
+				}
+
 				value := strings.TrimSpace(actualKeyValue[1])
 				var jsonObj map[string]interface{}
 				switch {
@@ -422,6 +428,12 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				expectTrimmedLine := line[3:] // Trim the '- ' prefix from the current line.
 				expectkeyValue := strings.SplitN(expectTrimmedLine, ":", 2)
 				expectKey = strings.TrimSpace(expectkeyValue[0])
+				isNoised := checkNoise(expectKey, noise)
+
+				if isNoised {
+					continue
+				}
+
 				value := strings.TrimSpace(expectkeyValue[1])
 				var jsonObj map[string]interface{}
 				switch {
@@ -936,4 +948,13 @@ func normalizeJSON(input []byte) ([]byte, error) {
 		return nil, err
 	}
 	return buffer.Bytes(), nil
+}
+
+func checkNoise(key string, noise map[string][]string) bool {
+	for e := range noise {
+		if strings.Contains(key, e) {
+			return true
+		}
+	}
+	return false
 }
