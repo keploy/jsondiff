@@ -1,6 +1,7 @@
 package colorisediff
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -118,6 +119,20 @@ func checkKeyInMaps(expectedJSONMap, actualJSONMap []byte, targetKey string) (st
 // actualJSON: The second JSON object in byte form.
 // Returns a string representing the differences and an error if any.
 func calculateJSONDiffs(expectedJSON, actualJSON []byte) (string, error) {
+	expectedJSON, err := normalizeJSON(expectedJSON)
+
+	if err != nil {
+		fmt.Println("Error normalizing expected JSON")
+		return "", err
+	}
+
+	actualJSON, err = normalizeJSON(actualJSON)
+
+	if err != nil {
+		fmt.Println("Error normalizing actual JSON")
+		return "", err
+	}
+
 	// Parse both JSON objects.
 	expectedResult := gjson.ParseBytes(expectedJSON)
 	actualResult := gjson.ParseBytes(actualJSON)
@@ -913,4 +928,12 @@ func diffArrayRange(s1, s2 string) ([]int, []int, bool) {
 
 	// Return the indices of differences for both strings and whether differences were found.
 	return indices1, indices2, diffFound
+}
+
+func normalizeJSON(input []byte) ([]byte, error) {
+	var buffer bytes.Buffer
+	if err := json.Compact(&buffer, input); err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
 }
