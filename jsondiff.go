@@ -391,27 +391,35 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 	var isExpectMap, isActualMap bool
 	expect, actual := "", ""
 
-	// Adding Open Brackets
-	expect += "{\n"
-	actual += "{\n"
+	// Stack to track the JSON path
+	jsonPath := []string{}
+
+	fmt.Println("DIFF STR ::", diffStr,"len ::", len(lines))
 	// Iterate over the lines, processing each line and the next line together.
 	for i := 0; i < len(lines)-1; i++ {
 		var expectKey, actualKey string
 		line := lines[i]
 		nextLine := lines[i+1]
-
+		fmt.Println("CURRENT LINE ::", line)
 		// Process lines that start with a '-' indicating expected differences.
 		if len(line) > 0 && line[0] == '-' && i != len(lines)-1 {
 			if len(nextLine) > 3 && len(strings.SplitN(nextLine[3:], ":", 2)) == 2 {
 				actualTrimmedLine := nextLine[3:] // Trim the '+ ' prefix from the next line.
 				actualKeyValue := strings.SplitN(actualTrimmedLine, ":", 2)
 				actualKey = strings.TrimSpace(actualKeyValue[0])
-				isNoised := checkNoise(actualKey, noise)
 
+				// Update the JSON path stack
+				jsonPath = append(jsonPath, actualKey)
+				fmt.Println("CURRENT ACTUAL JSON PATH ::", jsonPath)
+				// Check for noise based on the current JSON path
+				isNoised := checkNoise(strings.Join(jsonPath, "."), noise)
 				if isNoised {
+					// Pop the key off the path stack and continue
+					jsonPath = jsonPath[:len(jsonPath)-1]
 					continue
 				}
 
+				// Process the value
 				value := strings.TrimSpace(actualKeyValue[1])
 				var jsonObj map[string]interface{}
 				switch {
@@ -423,17 +431,29 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 					actualValue = value
 				}
 
+				// Pop the key off the path stack
+				jsonPath = jsonPath[:len(jsonPath)-1]
 			}
+
 			if len(strings.SplitN(line[3:], ":", 2)) == 2 {
 				expectTrimmedLine := line[3:] // Trim the '- ' prefix from the current line.
 				expectkeyValue := strings.SplitN(expectTrimmedLine, ":", 2)
 				expectKey = strings.TrimSpace(expectkeyValue[0])
-				isNoised := checkNoise(expectKey, noise)
 
+				// Update the JSON path stack
+				jsonPath = append(jsonPath, expectKey)
+
+				fmt.Println("CURRENT EXPECTED JSON PATH ::", jsonPath)
+
+				// Check for noise based on the current JSON path
+				isNoised := checkNoise(strings.Join(jsonPath, "."), noise)
 				if isNoised {
+					// Pop the key off the path stack and continue
+					jsonPath = jsonPath[:len(jsonPath)-1]
 					continue
 				}
 
+				// Process the value
 				value := strings.TrimSpace(expectkeyValue[1])
 				var jsonObj map[string]interface{}
 				switch {
@@ -444,7 +464,11 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				default:
 					expectValue = value
 				}
+
+				// Pop the key off the path stack
+				jsonPath = jsonPath[:len(jsonPath)-1]
 			}
+
 			// Define color functions for red and green.
 			red := color.New(color.FgRed).SprintFunc()
 			green := color.New(color.FgGreen).SprintFunc()
@@ -951,10 +975,11 @@ func normalizeJSON(input []byte) ([]byte, error) {
 }
 
 func checkNoise(key string, noise map[string][]string) bool {
+	fmt.Println("KEYYYY: ", key, "NOISE: ", noise)
 	for e := range noise {
 		if strings.Contains(key, e) {
 			return true
 		}
 	}
-	return false
+	return false // Return false if no noise path matched
 }
