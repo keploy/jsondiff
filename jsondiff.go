@@ -214,7 +214,7 @@ func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, 
 // indent: The indentation string to use for formatting.
 // red, green: Functions to apply red and green colors respectively for differences.
 // Returns two strings: the colorized differences for the expected and actual slices.
-func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func(a ...interface{}) string) (string, string) {
+func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func(a ...interface{}) string, jsonPath string, noise map[string][]string) (string, string) {
 	var expectedOutput strings.Builder // Builder for the expected output string.
 	var actualOutput strings.Builder   // Builder for the actual output string.
 	maxLength := len(a)                // Determine the maximum length between the two slices.
@@ -257,7 +257,7 @@ func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func
 			case map[string]interface{}:
 				if v2, ok := bValue.(map[string]interface{}); ok {
 					// Recursively compare and colorize maps.
-					expectedText, actualText := compareAndColorizeMaps(v1, v2, indent+"  ", red, green)
+					expectedText, actualText := compareAndColorizeMaps(v1, v2, indent+"  ", red, green, jsonPath, noise)
 					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, expectedText))
 					actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, actualText))
 					continue
@@ -266,7 +266,7 @@ func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func
 			case []interface{}:
 				if v2, ok := bValue.([]interface{}); ok {
 					// Recursively compare and colorize slices.
-					expectedText, actualText := compareAndColorizeSlices(v1, v2, indent+"  ", red, green)
+					expectedText, actualText := compareAndColorizeSlices(v1, v2, indent+"  ", red, green, jsonPath, noise)
 					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, i, expectedText, indent))
 					actualOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, i, actualText, indent))
 					continue
@@ -307,14 +307,22 @@ func serialize(value interface{}) string {
 // expect: The builder for the expected output.
 // actual: The builder for the actual output.
 // red, green: Functions to apply red and green colors respectively for differences.
-func compare(key string, val1, val2 interface{}, indent string, expect, actual *strings.Builder, red, green func(a ...interface{}) string) {
+func compare(key string, val1, val2 interface{}, indent string, expect, actual *strings.Builder, red, green func(a ...interface{}) string, jsonPath string, noise map[string][]string) {
+	jsonPath = jsonPath + "." + key
+
+	isNoised := checkNoise(jsonPath, noise)
+
+	if isNoised {
+		return
+	}
+
 	switch v1 := val1.(type) {
 	// Case for map[string]interface{} type
 	case map[string]interface{}:
 		// Check if the second value is also a map[string]interface{}
 		if v2, ok := val2.(map[string]interface{}); ok {
 			// Recursively compare and colorize maps
-			expectedText, actualText := compareAndColorizeMaps(v1, v2, indent+"  ", red, green)
+			expectedText, actualText := compareAndColorizeMaps(v1, v2, indent+"  ", red, green, jsonPath, noise)
 			expect.WriteString(fmt.Sprintf("%s\"%s\": %s\n", indent, key, expectedText))
 			actual.WriteString(fmt.Sprintf("%s\"%s\": %s\n", indent, key, actualText))
 			return
@@ -328,7 +336,7 @@ func compare(key string, val1, val2 interface{}, indent string, expect, actual *
 		// Check if the second value is also a []interface{}
 		if v2, ok := val2.([]interface{}); ok {
 			// Recursively compare and colorize slices
-			expectedText, actualText := compareAndColorizeSlices(v1, v2, indent+"  ", red, green)
+			expectedText, actualText := compareAndColorizeSlices(v1, v2, indent+"  ", red, green, jsonPath, noise)
 			expect.WriteString(fmt.Sprintf("%s\"%s\": [\n%s\n%s]\n", indent, key, expectedText, indent))
 			actual.WriteString(fmt.Sprintf("%s\"%s\": [\n%s\n%s]\n", indent, key, actualText, indent))
 			return
@@ -391,34 +399,21 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 	var isExpectMap, isActualMap bool
 	expect, actual := "", ""
 
-	// Stack to track the JSON path
-	jsonPath := []string{}
+	expect += "{\n"
+	actual += "{\n"
 
-	fmt.Println("DIFF STR ::", diffStr,"len ::", len(lines))
 	// Iterate over the lines, processing each line and the next line together.
 	for i := 0; i < len(lines)-1; i++ {
 		var expectKey, actualKey string
 		line := lines[i]
 		nextLine := lines[i+1]
-		fmt.Println("CURRENT LINE ::", line)
+
 		// Process lines that start with a '-' indicating expected differences.
 		if len(line) > 0 && line[0] == '-' && i != len(lines)-1 {
 			if len(nextLine) > 3 && len(strings.SplitN(nextLine[3:], ":", 2)) == 2 {
 				actualTrimmedLine := nextLine[3:] // Trim the '+ ' prefix from the next line.
 				actualKeyValue := strings.SplitN(actualTrimmedLine, ":", 2)
 				actualKey = strings.TrimSpace(actualKeyValue[0])
-
-				// Update the JSON path stack
-				jsonPath = append(jsonPath, actualKey)
-				fmt.Println("CURRENT ACTUAL JSON PATH ::", jsonPath)
-				// Check for noise based on the current JSON path
-				isNoised := checkNoise(strings.Join(jsonPath, "."), noise)
-				if isNoised {
-					// Pop the key off the path stack and continue
-					jsonPath = jsonPath[:len(jsonPath)-1]
-					continue
-				}
-
 				// Process the value
 				value := strings.TrimSpace(actualKeyValue[1])
 				var jsonObj map[string]interface{}
@@ -430,29 +425,12 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				default:
 					actualValue = value
 				}
-
-				// Pop the key off the path stack
-				jsonPath = jsonPath[:len(jsonPath)-1]
 			}
 
 			if len(strings.SplitN(line[3:], ":", 2)) == 2 {
 				expectTrimmedLine := line[3:] // Trim the '- ' prefix from the current line.
 				expectkeyValue := strings.SplitN(expectTrimmedLine, ":", 2)
 				expectKey = strings.TrimSpace(expectkeyValue[0])
-
-				// Update the JSON path stack
-				jsonPath = append(jsonPath, expectKey)
-
-				fmt.Println("CURRENT EXPECTED JSON PATH ::", jsonPath)
-
-				// Check for noise based on the current JSON path
-				isNoised := checkNoise(strings.Join(jsonPath, "."), noise)
-				if isNoised {
-					// Pop the key off the path stack and continue
-					jsonPath = jsonPath[:len(jsonPath)-1]
-					continue
-				}
-
 				// Process the value
 				value := strings.TrimSpace(expectkeyValue[1])
 				var jsonObj map[string]interface{}
@@ -464,9 +442,6 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				default:
 					expectValue = value
 				}
-
-				// Pop the key off the path stack
-				jsonPath = jsonPath[:len(jsonPath)-1]
 			}
 
 			// Define color functions for red and green.
@@ -474,13 +449,15 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 			green := color.New(color.FgGreen).SprintFunc()
 			var expectedText, actualText string
 
+			intialJsonPath := ""
+
 			if expectValue != nil && actualValue != nil {
 				var expectBuilder, actualBuilder strings.Builder
 				if expectKey != actualKey {
 					actualBuilder.WriteString(fmt.Sprintf("%s: %s\n", green(serialize(actualKey[:len(actualKey)-1])), actualValue))
 					expectBuilder.WriteString(fmt.Sprintf("%s: %s\n", red(serialize(expectKey[:len(expectKey)-1])), expectValue))
 				} else {
-					compare(expectKey[:len(expectKey)-1], expectValue, actualValue, " ", &expectBuilder, &actualBuilder, red, green)
+					compare(expectKey[:len(expectKey)-1], expectValue, actualValue, " ", &expectBuilder, &actualBuilder, red, green, intialJsonPath, noise)
 				}
 				expectedText = expectBuilder.String()
 				actualText = actualBuilder.String()
@@ -488,9 +465,13 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				if actualKey != expectKey {
 					continue
 				}
-				expectedText, actualText = compareAndColorizeSlices(expectsArray, actualsArray, " ", red, green)
+				isNoised := checkNoise(actualKey, noise)
+				if isNoised {
+					continue
+				}
+				expectedText, actualText = compareAndColorizeSlices(expectsArray, actualsArray, " ", red, green, intialJsonPath, noise)
 			} else if isExpectMap && isActualMap {
-				expectedText, actualText = compareAndColorizeMaps(expectMap, actualMap, " ", red, green)
+				expectedText, actualText = compareAndColorizeMaps(expectMap, actualMap, " ", red, green, intialJsonPath, noise)
 				// Removing extra { and } from the expected and actual text.
 				expectedText = expectedText[2 : len(expectedText)-2]
 				actualText = actualText[2 : len(actualText)-2]
@@ -774,7 +755,7 @@ func truncateToMatchWithEllipsis(expectedText, actualText string) (string, strin
 // indent: The indentation string to use for formatting.
 // red, green: Functions to apply red and green colors respectively.
 // Returns two strings: the colorized differences for the expected and actual maps.
-func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, green func(a ...interface{}) string) (string, string) {
+func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, green func(a ...interface{}) string, jsonPath string, noise map[string][]string) (string, string) {
 	var expectedOutput, actualOutput strings.Builder // Builders for the resulting strings.
 	expectedOutput.WriteString("{\n")                // Start the expected output with an opening brace and newline.
 	actualOutput.WriteString("{\n")                  // Start the actual output with an opening brace and newline.
@@ -788,13 +769,19 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 		}
 
 		// Compare the values for the current key in both maps.
-		compare(key, aValue, bValue, indent+"  ", &expectedOutput, &actualOutput, red, green)
+		compare(key, aValue, bValue, indent+"  ", &expectedOutput, &actualOutput, red, green, jsonPath, noise)
 	}
 
 	// Iterate over each key-value pair in the second map.
 	for key, bValue := range b {
 		if _, aHasKey := a[key]; !aHasKey { // If the key does not exist in the first map.
-			writeKeyValuePair(&actualOutput, green(key), bValue, indent+"  ", green) // Write the key-value pair with green color.
+			jsonPath = jsonPath + "." + key
+
+			isNoised := checkNoise(jsonPath, noise)
+
+			if !isNoised {
+				writeKeyValuePair(&actualOutput, green(key), bValue, indent+"  ", green) // Write the key-value pair with green color.
+			}
 		}
 	}
 
@@ -975,7 +962,7 @@ func normalizeJSON(input []byte) ([]byte, error) {
 }
 
 func checkNoise(key string, noise map[string][]string) bool {
-	fmt.Println("KEYYYY: ", key, "NOISE: ", noise)
+	key = strings.TrimPrefix(key, ".")
 	for e := range noise {
 		if strings.Contains(key, e) {
 			return true
