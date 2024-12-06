@@ -257,7 +257,8 @@ func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func
 			case map[string]interface{}:
 				if v2, ok := bValue.(map[string]interface{}); ok {
 					// Recursively compare and colorize maps.
-					expectedText, actualText := compareAndColorizeMaps(v1, v2, indent+"  ", red, green, jsonPath, noise)
+					prefixedValue := jsonPath + "[" + fmt.Sprint(i) + "]"
+					expectedText, actualText := compareAndColorizeMaps(v1, v2, indent+"  ", red, green, prefixedValue, noise)
 					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, expectedText))
 					actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, actualText))
 					continue
