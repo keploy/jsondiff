@@ -25,6 +25,8 @@ func TestSprintJSONDiff(t *testing.T) {
 		json2           string
 		expectedStringA []string
 		expectedStringB []string
+		isNoised        bool
+		noise           map[string][]string
 	}{
 		{
 			expectedStringA: []string{
@@ -669,11 +671,35 @@ func TestSprintJSONDiff(t *testing.T) {
 			json2: "{\"zoo\":{\"animals\":[{\"species\":\"mammal\",\"name\":\"Elephant\",\"age\":10},{\"type\":\"bird\",\"name\":\"Parrot\",\"age\":2}]}}",
 			name:  "random key change in deeply nested mixed structures",
 		},
+		{
+			expectedStringA: []string{
+				"29a03b5d51ae5ae3b35affbc646f08b8d77d4c34a001945f125dda0b9d581a7b",
+			},
+			expectedStringB: []string{
+				"aa041336dda91711129ab5d24f1e19d636e819452252ab20da1bf072b21c75f4",
+			},
+			json1:    "{\"key1\": [\"a\", \"b\", \"c\"], \"key2\": \"value1\"}",
+			json2:    "{\"key1\": [\"a\", \"b\", \"d\"], \"keyX\": \"value1\"}",
+			name:     "random key transformation in a map with nested array key changes labeled as noise",
+			isNoised: true,
+			noise: map[string][]string{
+				"key1": {},
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resp, err := CompareJSON([]byte(tt.json1), []byte(tt.json2), map[string][]string{}, false)
+
+			var resp Diff
+			var err error
+
+			if tt.isNoised {
+				resp, err = CompareJSON([]byte(tt.json1), []byte(tt.json2), tt.noise, false)
+			} else {
+				resp, err = CompareJSON([]byte(tt.json1), []byte(tt.json2), map[string][]string{}, false)
+			}
+
 			if err != nil {
 				fmt.Println(err.Error())
 				fmt.Println(resp)
