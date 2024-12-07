@@ -28,6 +28,36 @@ type Diff struct {
 
 func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]string, disableColor bool) (Diff, error) {
 	color.NoColor = disableColor
+
+	var expectedType interface{}
+	var actualType interface{}
+
+	if err := json.Unmarshal(expectedJSON, &expectedType); err != nil {
+		fmt.Println("Error unmarshalling expected JSON")
+		return Diff{}, err
+	}
+
+	if err := json.Unmarshal(actualJSON, &actualType); err != nil {
+		fmt.Println("Error unmarshalling actual JSON")
+		return Diff{}, err
+	}
+
+	// Check if types of expected and actual JSON are the same.
+
+	if reflect.TypeOf(expectedType) != reflect.TypeOf(actualType) {
+		expectedJSONString := `Type of expected body: ` + reflect.TypeOf(expectedType).Kind().String()
+		actualJSONString := `Type of actual body: ` + reflect.TypeOf(actualType).Kind().String()
+		offset := []int{4}
+
+		highlightExpected := color.FgHiRed
+		highlightActual := color.FgHiGreen
+
+		return Diff{
+			Expected: breakSliceWithColor(expectedJSONString, &highlightExpected, offset),
+			Actual:   breakSliceWithColor(actualJSONString, &highlightActual, offset),
+		}, nil
+	}
+
 	// Calculate the differences between the two JSON objects.
 	diffString, err := calculateJSONDiffs(expectedJSON, actualJSON)
 	if err != nil || diffString == "" {
@@ -36,7 +66,7 @@ func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]stri
 	// Extract the modified keys from the diff string.
 	modifiedKeys := extractKey(diffString)
 
-	t := reflect.TypeOf(expectedJSON)
+	t := reflect.TypeOf(expectedType)
 
 	if t.Kind() == reflect.Map {
 		// Check if the modified keys exist in the provided maps and add additional context if they do.
