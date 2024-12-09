@@ -108,8 +108,8 @@ func Compare(expectedJSON, actualJSON string) Diff {
 
 	// Return the colorized differences in a Diff struct.
 	return Diff{
-		Expected: colorizedExpected,
-		Actual:   colorizedActual,
+		Expected: breakLines(colorizedExpected),
+		Actual:   breakLines(colorizedActual),
 	}
 }
 
@@ -225,17 +225,24 @@ func extractKey(diffString string) string {
 // colorFunc: The function to apply color to the value, if provided.
 func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, indent string, applyColor func(a ...interface{}) string) {
 	// Serialize the value to a pretty-printed JSON string.
-	serializedValue, _ := json.MarshalIndent(value, "", "  ")
-	formattedValue := string(serializedValue)
+	switch reflect.TypeOf(value).Kind() {
+	case reflect.Map:
+		formattedValue := applyColor("{ ... }")
 
-	// Check if a color function is provided and the value is not empty.
-	if applyColor != nil && value != "" {
-		formattedValue = applyColor(formattedValue)
+		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
+	default:
+
+		serializedValue, _ := json.MarshalIndent(value, "", "  ")
+		formattedValue := string(serializedValue)
+
+		// Check if a color function is provided and the value is not empty.
+		if applyColor != nil && value != "" {
+			formattedValue = applyColor(formattedValue)
+		}
+
+		// Write the key-value pair to the builder with or without colorization.
+		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
 	}
-
-	// Write the key-value pair to the builder with or without colorization.
-	builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
-
 }
 
 // compareAndColorizeSlices compares two slices and returns the differences as colorized strings.
@@ -751,7 +758,7 @@ func truncateToMatchWithEllipsis(expectedText, actualText string) (string, strin
 	ellipsis := builder.String()
 
 	// Function to truncate the lines and add ellipses in the middle.
-	truncate := func(lines []string, matchLineCount int, color string) string {
+	truncate := func(lines []string, matchLineCount int, _ string) string {
 		// If the number of lines is less than or equal to the match line count, return the lines as a single string.
 		if len(lines) <= matchLineCount {
 			return strings.Join(lines, "\n")
@@ -767,7 +774,7 @@ func truncateToMatchWithEllipsis(expectedText, actualText string) (string, strin
 		bottomHalfLineCount := matchLineCount - 3 - topHalfLineCount
 
 		// Truncate the lines by keeping the top and bottom halves and adding ellipses in the middle.
-		truncated := append(lines[:topHalfLineCount], ellipsis+color)
+		truncated := append(lines[:topHalfLineCount], ellipsis)
 		truncated = append(truncated, lines[len(lines)-bottomHalfLineCount:]...)
 		return strings.Join(truncated, "\n") + reset
 	}
