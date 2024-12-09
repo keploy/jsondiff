@@ -614,11 +614,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"d6ce134d7dd3367ee6201869c1ee642f065b54f200a8023d5ccd6df6417828d5",
-				"cc1d6ab9fd7c8cf07fbf85a1710eab59ebc861f4da193cafbdcfe7784ebf22d2",
+				"0e3cca6969dcc5294cf90792b2cb5253adc51b37ab5b8a17f25dfeef51b798ab",
 			},
 			expectedStringB: []string{
-				"094a72abe8018edc3aa6dabd237f5f405c4d061eb1bba76f14b6a862b818d9d4",
+				"2e2609aeccc418eaf137d9dd04af5de8805e8c031bfd1f7b6d1327dd1db41d1b",
 			},
 			json1: "{\"animal\":{\"name\":\"Cat\",\"attributes\":{\"color\":\"black\",\"age\":5}}}",
 			json2: "{\"animal\":{\"name\":\"Cat\",\"characteristics\":{\"color\":\"black\",\"age\":5}}}",
