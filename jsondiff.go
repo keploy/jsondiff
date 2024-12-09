@@ -308,7 +308,8 @@ func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func
 			case []interface{}:
 				if v2, ok := bValue.([]interface{}); ok {
 					// Recursively compare and colorize slices.
-					expectedText, actualText := compareAndColorizeSlices(v1, v2, indent+"  ", red, green, jsonPath, noise)
+					prefixedValue := jsonPath + "[" + fmt.Sprint(i) + "]"
+					expectedText, actualText := compareAndColorizeSlices(v1, v2, indent+"  ", red, green, prefixedValue, noise)
 					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, i, expectedText, indent))
 					actualOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, i, actualText, indent))
 					continue
@@ -316,7 +317,9 @@ func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func
 
 			default:
 				// If values are not deeply equal, write the values with colors.
-				if reflect.DeepEqual(aValue, bValue) {
+				prefixedValue := jsonPath + "[" + fmt.Sprint(i) + "]"
+				isNoised := checkNoise(prefixedValue, noise)
+				if reflect.DeepEqual(aValue, bValue) || isNoised {
 					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, aValue))
 					actualOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, bValue))
 					continue
