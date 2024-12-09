@@ -230,6 +230,10 @@ func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, 
 		formattedValue := applyColor("{ ... }")
 
 		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
+	case reflect.Slice:
+		formattedValue := applyColor("[ ... ]")
+
+		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
 	default:
 
 		serializedValue, _ := json.MarshalIndent(value, "", "  ")
@@ -351,6 +355,13 @@ func compare(key string, val1, val2 interface{}, indent string, expect, actual *
 	isNoised := checkNoise(jsonPath, noise)
 
 	if isNoised {
+		return
+	}
+
+	// check if the values are of same type or not
+	if reflect.TypeOf(val1) != reflect.TypeOf(val2) {
+		writeKeyValuePair(expect, key, val1, indent, red)
+		writeKeyValuePair(actual, key, val2, indent, green)
 		return
 	}
 
@@ -1001,6 +1012,7 @@ func normalizeJSON(input []byte) ([]byte, error) {
 
 func checkNoise(key string, noise map[string][]string) bool {
 	key = strings.TrimPrefix(key, ".")
+	key = strings.ToLower(key)
 	for e := range noise {
 		if strings.Contains(key, e) {
 			return true
