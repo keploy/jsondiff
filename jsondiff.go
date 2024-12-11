@@ -324,7 +324,6 @@ func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func
 					isNoised, _ = MatchesAnyRegex(InterfaceToString(aValue), regexArray)
 				}
 				if reflect.DeepEqual(aValue, bValue) || isNoised {
-					fmt.Println("Values are equal writing to both")
 					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, aValue))
 					actualOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, bValue))
 					continue
@@ -1042,7 +1041,6 @@ func MatchesAnyRegex(str string, regexArray []string) (bool, string) {
 	for _, pattern := range regexArray {
 		re := regexp.MustCompile(pattern)
 		if re.MatchString(str) {
-			fmt.Println("Matched with pattern: ", pattern)
 			return true, pattern
 		}
 	}
