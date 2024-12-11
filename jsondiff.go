@@ -526,7 +526,7 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				if actualKey != expectKey {
 					continue
 				}
-				isNoised, regexArray := checkNoise(actualKey, noise)
+				isNoised, regexArray := checkNoise(actualKey[:len(actualKey)-1], noise)
 				if isNoised && len(regexArray) == 0 {
 					continue
 				}
