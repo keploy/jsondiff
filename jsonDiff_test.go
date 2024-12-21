@@ -25,6 +25,8 @@ func TestSprintJSONDiff(t *testing.T) {
 		json2           string
 		expectedStringA []string
 		expectedStringB []string
+		isNoised        bool
+		noise           map[string][]string
 	}{
 		{
 			expectedStringA: []string{
@@ -41,10 +43,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"942a29ad1117489bc26adfa55f760b80431775a68c3e6b14fa330c4fdfc6c113",
+				"3bcc749b84f87efc5fd06c5b77ea853b6fff0c4f3f317f60fb41480096d64597",
 			},
 			expectedStringB: []string{
-				"f52e48bd14fd5f5b2b2c4fccb94a37f4a13d414887c6a108353194cab3aeef04",
+				"935be748ebb92097cc80dd5c3b55282b718bb27bcfeff389b5b096fd7165c646",
 			},
 			json1: "{\"animals\":[{\"name\":\"Cat\"},{\"name\":\"Dog\"},{\"name\":\"Elephant\"}]}",
 			json2: "{\"animals\":[{\"name\":\"Dog\"},{\"name\":\"Cat\"},{\"apple\":\"lusiancs\"},{\"name\":\"Elephant\"}]}",
@@ -52,9 +54,9 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"942a29ad1117489bc26adfa55f760b80431775a68c3e6b14fa330c4fdfc6c113",
+				"3bcc749b84f87efc5fd06c5b77ea853b6fff0c4f3f317f60fb41480096d64597",
 			},
-			expectedStringB: []string{"a1f015c7579d97ab123f2681b57e455bcc4bdadf49a7099d535d6f79cf6b8a8b"},
+			expectedStringB: []string{"6965acb9dc1e8ce2c7a581ebeb35c5f19e1da8b7aa71006bfcc8105509bcfdf3"},
 			json1:           "{\"animals\":[{\"name\":\"Cat\"},{\"name\":\"Dog\"},{\"name\":\"Elephant\"}]}",
 			json2:           "{\"animals\":[{\"name\":\"Dog\"},{\"name\":\"Cat\"},{\"apple\":\"lusiancs\"}]}",
 			name:            "nested JSONs with array differences",
@@ -74,10 +76,12 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"1204c3cca5399f0e7dfb964e5359c690ecb7b3e4c7886648e042ec57d1a2b158",
+				"71177a8bc7e1abfe019a4a1fad9407dc547362a59d70d16761ecc8f50d9ab31e",
+				"83058f9c21b01a272805827b35b527121b6c3b9a8189e3bded0fc269049c8121",
 			},
 			expectedStringB: []string{
-				"95a536d5813e507502fad570d0a700a73e8201fcc5bde4385bb08fee2ad133d3",
+				"4f0abd2d3a443c3d88da6e2ca4da35556cadce429f7f2f8506ec4a94a99c48d7",
+				"3945b6ce91aa49db148fdf52f018def9284a9f01a956abfe5fb1d4b24de634dc",
 			},
 			json1: "{\"animals\":{\"domestic\":[\"Cat\",\"Dog\"],\"wild\":[\"Elephant\",\"Lion\"]}}",
 			json2: "{\"animals\":{\"domestic\":[\"Dog\",\"Cat\"],\"wild\":[\"Lion\",\"Elephant\"]}}",
@@ -138,28 +142,22 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"ee6c39c2509b881d7affb0c50b71ffee763ce55b8881948a6c0d9e1791371d58",
-			},
-			expectedStringB: []string{
-				"3b415caf02b597cb987e53ded3f7dfc6bba4d3e36a4d07fc8d5e2baf1406be5d",
-			},
-			json1: "{\"family\":{\"parents\":[{\"name\":\"Alice\",\"age\":40},{\"name\":\"Bob\",\"age\":42}],\"children\":[{\"name\":\"Charlie\",\"age\":10},{\"name\":\"Daisy\",\"age\":8}]}}",
-
-			json2: "{\"family\":{\"parents\":[{\"name\":\"Bob\",\"age\":42},{\"name\":\"Alice\",\"age\":40}],\"children\":[{\"name\":\"Daisy\",\"age\":8},{\"name\":\"Charlie\",\"age\":10}]}}",
-			name:  "complex nested objects and arrays",
-		},
-		{
-			expectedStringA: []string{
 				"ef4dd42bb9dc629bbfade57743e72663c9a5d236c0e92cb4ce8c80e0d1304350",
 				"f71cbcb39804b502c41125d03be6c699baafa15efba8bbb5aef0b111039b2a87",
 				"fa012aa280e519ccb558663c5728faea94ed020988c83653a796926c35902ec0",
 				"ef0a5b31ffc0a36df02dcc08898cad0b92857cd1405cad0feefc18d888bf57d0",
+				"e0236118ff8532288842ad67be5bca9f81b15191ee2efc2eee077406fabf8bbd",
+				"c828a0590dbd6e6eefbee21c5855b19a8bff98930f0219816fe6f24c3705c5cb",
+				"17f1dc518cda544ae5ff4b2479e94d5ef811e542b387608dfe7b44e42937e452",
 			},
 			expectedStringB: []string{
 				"d79b35acf01b0f5138699ff1cc49ea89373b8ebf7e96118b839586a28c28bbee",
 				"8fe4e8830eb84cdacd2cbd60f62fc5d50dcecf3a5cc439ea7e24d87d4257c6a8",
 				"e765848380611cb81996ea9908ade2ee8940c21d72a84fd19ce1d1d6ddfa8e2a",
 				"001ff4d6bf9821bb067c73812ba5900574dd161d813f10623ba2515fdbed0f88",
+				"19018c74ffe402eb59202aadc1cab4f5c8171c96ba50f4621ab9d72f3b18914e",
+				"0bd78116662eba5d4fa8bbc64f81afbd879fb2e73cd6d85105e1f9bf3a658ae0",
+				"d11e6a5e5047d70f5e5633650bc4b3fd7a588d126fb785e5ac42b92fbf3e44f6",
 			},
 			json1: "{\"books\":[{\"title\":\"Book A\",\"author\":{\"name\":\"Author 1\"}},{\"title\":\"Book B\",\"author\":{\"name\":\"Author 2\"}}]}",
 			json2: "{\"books\":[{\"title\":\"Book B\",\"author\":{\"name\":\"Author 2\"}},{\"title\":\"Book A\",\"author\":{\"name\":\"Author 1\"}}]}",
@@ -167,25 +165,16 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"62ab6013fda48a72966106d362aea4458dc3605d09ee619bddcef68b445b91ce",
+				"83a2bdc32cf3b2ecba06bf4ef3c4bb11d6219a8ade62a1026667616221f4343b",
+				"a717fd9c62ccea2df24835e9db8cb99f8af3ebddc352a758dc55750e272f5a2b",
 			},
 			expectedStringB: []string{
-				"accb8ffe377dab1fd54cea155012c2b5825c386fc840deeff570be459a5c3f4b",
+				"847155ec0ab7092a7ed5a91b01073f736a03c7e5c0b2c61ea9daeb89fdb680ef",
+				"4baa4c73af6838aabe1796bce3a0ea547d4d5efa4bd630cbeeafd82003b0163b",
 			},
 			json1: "{\"key1\": [\"a\", \"b\", \"c\"], \"key2\": \"value1\"}",
 			json2: "{\"key1\": [\"a\", \"b\", \"c\"], \"key2\": \"value2\"}",
 			name:  "map containing array and string",
-		},
-		{
-			expectedStringA: []string{
-				"e18da78e72ac7ef0da7bedffc5a43f9baba140de33cbe0fd8e322538516adbff",
-			},
-			expectedStringB: []string{
-				"487115f6d087764eaba85aaedd48b210a68123586ecfeb2ae8d3c2a174339da7",
-			},
-			json1: "{\"outer\": {\"inner\": [{\"key\": \"value1\"}, {\"key\": \"value2\"}], \"array\": [1, 2, 3]}}",
-			json2: "{\"outer\": {\"inner\": [{\"key\": \"value1\"}, {\"key\": \"value3\"}], \"array\": [1, 3, 2]}}",
-			name:  "complex nested structures with maps and arrays",
 		},
 		{
 			expectedStringA: []string{
@@ -200,10 +189,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"796aaad4a3f107e4469dd3cac8389156d3837119c7042a3e981a68749b9bb195",
+				"e09f8de90ad75017085449da9978780c5aed1d5148c699bbbbfafe1feb05d2e1",
 			},
 			expectedStringB: []string{
-				"88c710589cf446d4b0f562ca951eecce240af49570b070ebbfcb4bf8dcfeb0be",
+				"9512ac00c487192872a36662b05bbf16d2c500206a9fc02c3f75b4ce5ab1f195",
 			},
 			json1: "{\"a\":[{\"b\":[{\"c\":\"d\"},2,3,{\"e\":\"f\"}]},[\"g\",\"h\"]]}",
 			json2: "{\"a\":[{\"b\":[{\"c\":\"d\"},3,2,{\"e\":\"f\"}]},[\"h\",\"g\"]]}",
@@ -222,10 +211,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"2977edb17897ccc72a65833e5aef5f5c82db420e0867cfecf6e4de9b7a2695cf",
+				"3cf5725c92bc27fa26481d4c5a686beef5a240f963e42825b3b3da47925b2f99",
 			},
 			expectedStringB: []string{
-				"38d73dfedb389ac13e8a8a53aa87c123240733cd8cf902be128fb61ede0287b2",
+				"d03634df9355fa94c2dba26bbe8b3acafb5e054e3e2eea579f952756feec18be",
 			},
 			json1: "{\"nested\":{\"key\":[]}}",
 			json2: "{\"nested\":{\"key\":[{\"mapKey1\":\"value1\", \"mapKey2\":[1, 2, {\"subKey\":\"subValue\"}], \"mapKey3\":{\"innerKey\":\"innerValue\"}}, {\"mapKey4\":\"value2\", \"mapKey5\":[3, 4, {\"subKey2\":\"subValue3\"}], \"mapKey6\":{\"innerKey2\":\"innerValue2\"}}]}}",
@@ -233,21 +222,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"796aaad4a3f107e4469dd3cac8389156d3837119c7042a3e981a68749b9bb195",
+				"3bcc749b84f87efc5fd06c5b77ea853b6fff0c4f3f317f60fb41480096d64597",
 			},
 			expectedStringB: []string{
-				"88c710589cf446d4b0f562ca951eecce240af49570b070ebbfcb4bf8dcfeb0be",
-			},
-			json1: "{\"a\":[{\"b\":[{\"c\":\"d\"},2,3,{\"e\":\"f\"}]},[\"g\",\"h\"]]}",
-			json2: "{\"a\":[{\"b\":[{\"c\":\"d\"},3,2,{\"e\":\"f\"}]},[\"h\",\"g\"]]}",
-			name:  "complex multi-type nested structures",
-		},
-		{
-			expectedStringA: []string{
-				"942a29ad1117489bc26adfa55f760b80431775a68c3e6b14fa330c4fdfc6c113",
-			},
-			expectedStringB: []string{
-				"f52e48bd14fd5f5b2b2c4fccb94a37f4a13d414887c6a108353194cab3aeef04",
+				"935be748ebb92097cc80dd5c3b55282b718bb27bcfeff389b5b096fd7165c646",
 			},
 			json1: "{\"animals\":[{\"name\":\"Cat\"},{\"name\":\"Dog\"},{\"name\":\"Elephant\"}]}",
 			json2: "{\"animals\":[{\"name\":\"Dog\"},{\"name\":\"Cat\"},{\"apple\":\"lusiancs\"},{\"name\":\"Elephant\"}]}",
@@ -255,10 +233,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"942a29ad1117489bc26adfa55f760b80431775a68c3e6b14fa330c4fdfc6c113",
+				"3bcc749b84f87efc5fd06c5b77ea853b6fff0c4f3f317f60fb41480096d64597",
 			},
 			expectedStringB: []string{
-				"a1f015c7579d97ab123f2681b57e455bcc4bdadf49a7099d535d6f79cf6b8a8b",
+				"6965acb9dc1e8ce2c7a581ebeb35c5f19e1da8b7aa71006bfcc8105509bcfdf3",
 			},
 			json1: "{\"animals\":[{\"name\":\"Cat\"},{\"name\":\"Dog\"},{\"name\":\"Elephant\"}]}",
 			json2: "{\"animals\":[{\"name\":\"Dog\"},{\"name\":\"Cat\"},{\"apple\":\"lusiancs\"}]}",
@@ -280,17 +258,6 @@ func TestSprintJSONDiff(t *testing.T) {
 			json1: "{\"animal\":{\"name\":\"Cat\",\"attributes\":{\"color\":\"black\",\"age\":5}}}",
 			json2: "{\"animal\":{\"name\":\"Cat\",\"attributes\":{\"color\":\"white\",\"age\":5}}}",
 			name:  "different key-value pairs in nested JSON",
-		},
-		{
-			expectedStringA: []string{
-				"1204c3cca5399f0e7dfb964e5359c690ecb7b3e4c7886648e042ec57d1a2b158",
-			},
-			expectedStringB: []string{
-				"95a536d5813e507502fad570d0a700a73e8201fcc5bde4385bb08fee2ad133d3",
-			},
-			json1: "{\"animals\":{\"domestic\":[\"Cat\",\"Dog\"],\"wild\":[\"Elephant\",\"Lion\"]}}",
-			json2: "{\"animals\":{\"domestic\":[\"Dog\",\"Cat\"],\"wild\":[\"Lion\",\"Elephant\"]}}",
-			name:  "nested arrays within objects",
 		},
 		{
 			expectedStringA: []string{
@@ -351,13 +318,37 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"ee6c39c2509b881d7affb0c50b71ffee763ce55b8881948a6c0d9e1791371d58",
+				"d896342371be7600a1d266ad71ce895ddfb3bb307928a2fb7338d5bfb12d16a7",
+				"8317e30c64967ec9a7d82332831630315a64ab03496dc11851984693ccc6ef3c",
+				"507d00b6db2ba429d7bb6fd7cf422e145806761748690714ae4bd7672bb2e41a",
+				"e61a886b811b80831b9a69293200addfefea3ac0a4fbc401422c32b0815353f7",
+				"689295d50d283dfb54cef114968a0b5eebd44613ae313bc9d1719e8a18e4c83d",
+				"2622053f90dead9c5bbad099944c3736877f2d65ce9bb716b782b2467936b27c",
+				"e94990f2032dca084904454bdd78da23ae7de904aea3620b4b6e3a0b0ff85f96",
+				"52c0d440ad1a7658e150f9fd60328042f32cff5695290d00af86b915f814d55b",
+				"7b34250150643662fc5e023ab8793533c3929acbe80f5202a3177d2c37e5fe79",
+				"76ff030bf9645182aacf9383e97f78ec96143e7d79c56a8fe4b28440f4fc6092",
+				"3b477686293f714247a3f70386610e2dfeec8ec161eaee76d50025433579955f",
+				"e3a93f1273fe682c72e5e440f9e706d97765baaafb468809072759f20c024dca",
+				"16c0692326655ceedeaccadaa05f04fed9c39a9b8b25783c0401cec429de5e6d",
+				"897eb927925bc216402ad7206e3a8ac49c834e3958900786667bd714ef1b8f1f",
+				"b3f335d396b18a08d5045a9af8bc9319205067a3f0242139093295c151d26d38",
+				"ed177368aab7cdc3b865a1b211491689beb12ac9a2092bc302aa8e9b207de37b",
 			},
 			expectedStringB: []string{
-				"3b415caf02b597cb987e53ded3f7dfc6bba4d3e36a4d07fc8d5e2baf1406be5d",
+				"82ef5e26330856df883b55e13725a1b71c56f787ab8b8e1d47d6df69ddf7121d",
+				"275e4bec238e61b624affaf51ece1beaa5e1d3cb08d875a501e6f0a32e6b6474",
+				"5b43d1d31702c9e74b93420fe30a3e64988edeb18b5aa7c6030108ab5ca43ccc",
+				"7112d7ed41c984911e7716bf7791972e4d4712e59578a9a6efe565632c162076",
+				"cf358de4037ee1daf5a36d4b6b89ded7aced41b6ac1a8ec0bcc9e063607eb194",
+				"78970da2cca7e3dfa6c46b4136603259b56eccc3083d51cd2bc190648e7f9dc1",
+				"24b7638a8f6fe9e626945f3cd9d85d166a47c98b502dc6e48a91ec254cb857c2",
+				"bf7120f76e1a3722fc44a6a21b2de827648b5c30a337d13a7037c3c51ee0615f",
+				"27fc604f00be8e93b2e8ae0d8bc44c371c5c71b172c8cd7c83c1bed5cba0329d",
+				"04323636cbf90c4e5faed7090d42c598792e3abec38503e07affaf9b476dd2e2",
+				"a7e87a1d0a3ca5f8a1c79e576883489884cc72f607495418f6c7910cc6945941",
 			},
 			json1: "{\"family\":{\"parents\":[{\"name\":\"Alice\",\"age\":40},{\"name\":\"Bob\",\"age\":42}],\"children\":[{\"name\":\"Charlie\",\"age\":10},{\"name\":\"Daisy\",\"age\":8}]}}",
-
 			json2: "{\"family\":{\"parents\":[{\"name\":\"Bob\",\"age\":42},{\"name\":\"Alice\",\"age\":40}],\"children\":[{\"name\":\"Daisy\",\"age\":8},{\"name\":\"Charlie\",\"age\":10}]}}",
 			name:  "complex nested objects and arrays",
 		},
@@ -367,12 +358,16 @@ func TestSprintJSONDiff(t *testing.T) {
 				"ef4dd42bb9dc629bbfade57743e72663c9a5d236c0e92cb4ce8c80e0d1304350",
 				"ef0a5b31ffc0a36df02dcc08898cad0b92857cd1405cad0feefc18d888bf57d0",
 				"f71cbcb39804b502c41125d03be6c699baafa15efba8bbb5aef0b111039b2a87",
+				"e0236118ff8532288842ad67be5bca9f81b15191ee2efc2eee077406fabf8bbd",
+				"17f1dc518cda544ae5ff4b2479e94d5ef811e542b387608dfe7b44e42937e452",
 			},
 			expectedStringB: []string{
 				"8fe4e8830eb84cdacd2cbd60f62fc5d50dcecf3a5cc439ea7e24d87d4257c6a8",
 				"e765848380611cb81996ea9908ade2ee8940c21d72a84fd19ce1d1d6ddfa8e2a",
 				"d79b35acf01b0f5138699ff1cc49ea89373b8ebf7e96118b839586a28c28bbee",
 				"001ff4d6bf9821bb067c73812ba5900574dd161d813f10623ba2515fdbed0f88",
+				"19018c74ffe402eb59202aadc1cab4f5c8171c96ba50f4621ab9d72f3b18914e",
+				"d11e6a5e5047d70f5e5633650bc4b3fd7a588d126fb785e5ac42b92fbf3e44f6",
 			},
 			json1: "{\"books\":[{\"title\":\"Book A\",\"author\":{\"name\":\"Author 1\"}},{\"title\":\"Book B\",\"author\":{\"name\":\"Author 2\"}}]}",
 			json2: "{\"books\":[{\"title\":\"Book B\",\"author\":{\"name\":\"Author 2\"}},{\"title\":\"Book A\",\"author\":{\"name\":\"Author 1\"}}]}",
@@ -380,21 +375,16 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"62ab6013fda48a72966106d362aea4458dc3605d09ee619bddcef68b445b91ce",
+				"a46a95231b9cd0ad10bc0cfbaa15b106a626f028026f5fb1c04c277706dea4ba",
+				"8497a6d6bc8e7badf16c32683f73374b9381fb6d28c0baa3371c7bffbe363116",
+				"a46a95231b9cd0ad10bc0cfbaa15b106a626f028026f5fb1c04c277706dea4ba",
+				"8497a6d6bc8e7badf16c32683f73374b9381fb6d28c0baa3371c7bffbe363116",
 			},
 			expectedStringB: []string{
-				"accb8ffe377dab1fd54cea155012c2b5825c386fc840deeff570be459a5c3f4b",
-			},
-			json1: "{\"key1\": [\"a\", \"b\", \"c\"], \"key2\": \"value1\"}",
-			json2: "{\"key1\": [\"a\", \"b\", \"c\"], \"key2\": \"value2\"}",
-			name:  "map containing array and string",
-		},
-		{
-			expectedStringA: []string{
-				"e18da78e72ac7ef0da7bedffc5a43f9baba140de33cbe0fd8e322538516adbff",
-			},
-			expectedStringB: []string{
-				"487115f6d087764eaba85aaedd48b210a68123586ecfeb2ae8d3c2a174339da7",
+				"30490381e549259178bb23d3c2ff563c0ab85843b9408a547f6de169510e9e27",
+				"aa6dc46abfebfb022c2223c1e58ab204224a3e5bb20189c677c7ec1b13dd67e8",
+				"30490381e549259178bb23d3c2ff563c0ab85843b9408a547f6de169510e9e27",
+				"aa6dc46abfebfb022c2223c1e58ab204224a3e5bb20189c677c7ec1b13dd67e8",
 			},
 			json1: "{\"outer\": {\"inner\": [{\"key\": \"value1\"}, {\"key\": \"value2\"}], \"array\": [1, 2, 3]}}",
 			json2: "{\"outer\": {\"inner\": [{\"key\": \"value1\"}, {\"key\": \"value3\"}], \"array\": [1, 3, 2]}}",
@@ -424,10 +414,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"c92125d4c9db0bba4de49575505bc7917b13c05f1340ee20b6540d8c7a98ce9e",
+				"3cf5725c92bc27fa26481d4c5a686beef5a240f963e42825b3b3da47925b2f99",
 			},
 			expectedStringB: []string{
-				"38d73dfedb389ac13e8a8a53aa87c123240733cd8cf902be128fb61ede0287b2",
+				"d03634df9355fa94c2dba26bbe8b3acafb5e054e3e2eea579f952756feec18be",
 			},
 			json1: "{\"nested\":{\"key\":[]}}",
 			json2: "{\"nested\":{\"key\":[{\"mapKey1\":\"value1\", \"mapKey2\":[1, 2, {\"subKey\":\"subValue\"}], \"mapKey3\":{\"innerKey\":\"innerValue\"}}, {\"mapKey4\":\"value2\", \"mapKey5\":[3, 4, {\"subKey2\":\"subValue3\"}], \"mapKey6\":{\"innerKey2\":\"innerValue2\"}}]}}",
@@ -437,10 +427,12 @@ func TestSprintJSONDiff(t *testing.T) {
 			expectedStringA: []string{
 				"49bec237abb42a872e82edee006cb72e8270b4c14179140ce03ebc47ad36fa2d",
 				"3cd84203cf23bffc56c12344c2b2fbf313c1e4ed34f125ea813a50b42adca1d9",
+				"825c067292a1b5ce6ce1724c52fa2068bfb651a35273a65351be3e63d8614df1",
 			},
 			expectedStringB: []string{
 				"f3603f2c454c9d81d8cc19296af4e4aff906d102263beea5af3892c223d0ef29",
 				"c25b5b827481d888a7a5551ee05d6ea4590d59d2674fb5182394f13c3adca29a",
+				"d2f1d7f7dcea6764caeab964e34a99e936715959cc066ebd77822bb5daa80316",
 			},
 			json1: "{\"longKey\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"nested\":{\"key1\":{\"subkey1\":\"value1\"},\"key2\":{\"subkey2\":\"value2\"}}}",
 			json2: "{\"longKey\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"nested\":{\"key1\":{\"subkey1\":\"value1\"},\"key2\":{\"subkey2\":\"value3\"}}}",
@@ -459,10 +451,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"4df8308831c7811a06699d7c236e724f8e3248aace687b99bbe1f14c417a8c06",
+				"12c125afe3a7407f86662493532d9ec9e02a29ae4eafbd5dcf6804838d9a309f",
 			},
 			expectedStringB: []string{
-				"4c72c31c7c8f66ae2662299f88c249d763953baad8e4eff5bec9d0361bd893b7",
+				"f93548bac015173b19c04044be31e0f2e73b84c1ac16f89c597f563f8445e04b",
 			},
 			json1: "{\"longKeyWithSimilarTextButSlightlyDifferentEndingA\":\"value1\"}",
 			json2: "{\"longKeyWithSimilarTextButSlightlyDifferentEndingB\":\"value1\"}",
@@ -470,10 +462,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"52b75975d21bdc4912ab3aa353a9755543e67694b6c15742bb1076e388a7b6e1",
+				"c9a069dd6d3aaf5052219992d43c57f00d66881849a0004df66ca44d4bcab74d",
 			},
 			expectedStringB: []string{
-				"e34c79d5fd4e4ee75bb7835244b8234386f236241e5f840da0c12c046decda41",
+				"b6a5cc8d3ef65269d1c729f769d2e64fb501e545b2d2f3306d0359211220b242",
 			},
 			json1: "{\"paragraph\":\"This is a long paragraph with many words. The quick brown fox jumps over the lazy dog. A random word will change in the middle of this sentence.\"}",
 			json2: "{\"paragraph\":\"This is a long paragraph with many words. The quick brown fox jumps over the lazy dog. A random word will change in the middle of this phrase.\"}",
@@ -481,10 +473,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"c92125d4c9db0bba4de49575505bc7917b13c05f1340ee20b6540d8c7a98ce9e",
+				"3cf5725c92bc27fa26481d4c5a686beef5a240f963e42825b3b3da47925b2f99",
 			},
 			expectedStringB: []string{
-				"e7e569e9e4a42ae7ca9c33325ee352fc9c354f82103d29c4eed0de1b237f2bf2",
+				"d03634df9355fa94c2dba26bbe8b3acafb5e054e3e2eea579f952756feec18be",
 			},
 			json1: "{\"nested\":{\"key\":[]}}",
 			json2: "{\"nested\":{\"key\":[{\"mapKey1\":\"value1\", \"mapKey2\":[1, 2, {\"subKey\":\"subValue\"}], \"mapKey3\":{\"innerKey\":\"innerValue\"}}, {\"mapKey4\":\"value2\", \"mapKey5\":[3, 4, {\"subKey2\":\"subValue3\"}], \"mapKey6\":{\"innerKey2\":\"innerValue2\"}}]}}",
@@ -492,10 +484,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"236883bd9a3d1a972af96a85a87941cb76365c2854ec2e35acf26521327d79e3",
+				"2882d548db56674bf1d45dc423178c66c7dbcc3f7e72d5c2edca479cda04180c",
 			},
 			expectedStringB: []string{
-				"b7e2634e9f3c4b07a4063309b44afd0eb163bea43c1fa1204a4dd854ff73d459",
+				"9fe5ef3cbbc2103ec21ddf9497a5edba97e546d27f08cad456f208352bf5bc8d",
 			},
 			json1: "{\"longKey\":\"This is a long key with many words and a subtle change at the end of this sentence.\"}",
 			json2: "{\"longKey\":\"This is a long key with many words and a subtle change at the end of this phrase.\"}",
@@ -514,7 +506,7 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"63997b1efe697a365d49ddd6c835051580b94bac43f8c5ad11ffd0b687bdaf71",
+				"563c5a6b903195cf1e4d408c265edd57ca2f97d818db6ea0b688f30d7b642128",
 			},
 			expectedStringB: []string{
 				"2e340d7201d7bfbcf9dd8181407fbcbccf993b9b9150bc91c824a17421fb5087",
@@ -525,10 +517,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"c92125d4c9db0bba4de49575505bc7917b13c05f1340ee20b6540d8c7a98ce9e",
+				"3cf5725c92bc27fa26481d4c5a686beef5a240f963e42825b3b3da47925b2f99",
 			},
 			expectedStringB: []string{
-				"8665c882e7f19d3646a82006efbd66a4a0e8ed7a8f937b1bc32e85e1c107f0e1",
+				"b4cfe569317ebc80da8df0c08a2132de306e112089610a8a5dc7c186ae1eecfb",
 			},
 			json1: "{\"nested\":{\"key\":[]}}",
 			json2: "{\"nested\":{\"key\":[{\"mapKey1\":\"value1\", \"mapKey2\":[{\"subKey1\":\"value2\"}, \"string\", 123], \"mapKey3\":{\"innerKey\":\"innerValue\"}}, {\"mapKey4\":\"value3\", \"mapKey5\":[{\"subKey2\":\"value4\"}, \"anotherString\", 456], \"mapKey6\":{\"innerKey2\":\"innerValue2\"}}]}}",
@@ -586,9 +578,9 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"d1945cdf068b25eedbaf97164ad20c3d40ef8ce2933d1f68bfcf4ecf1024a0f9",
+				"c5f81a8644c342faa1eabbf13ec3dbb8385f21924c0fa1b29d07c20f75298b93",
 			},
-			expectedStringB: []string{"e74a4979229892171cc9ed5f4dffd89af08fbc17d411a6d80fe4658858ff3a74"},
+			expectedStringB: []string{"1d115db3ee7b8c6a77589b75dd5f11c09cbd081a18722530424b9fa0d96a8a3e"},
 			json1:           "{\"animals\":[{\"name\":\"Cat\"},{\"name\":\"Dog\"},{\"name\":\"Elephant\"}]}",
 			json2:           "{\"animals\":[{\"type\":\"Cat\"},{\"name\":\"Dog\"},{\"name\":\"Elephant\"}]}",
 			name:            "nested JSON with random key change",
@@ -608,9 +600,15 @@ func TestSprintJSONDiff(t *testing.T) {
 		{
 			expectedStringA: []string{
 				"62ab6013fda48a72966106d362aea4458dc3605d09ee619bddcef68b445b91ce",
+				"2bb2ce1e640717c6f57c428888bfcde932302e473c9d6ea6293e155178096bc5",
+				"e16149ca0595b6d8459d197ae2c84abf0129a5c8c822caaa76b01b3b4919f97d",
+				"8c0756121991a25e2386ab0010234b5e6c20be0517e6412094bff81310491cc8",
 			},
 			expectedStringB: []string{
 				"10c489902f9c50cbad5129747c2083d0790e1df4ca20fb0908d93babe5b18cb6",
+				"dfa379a98168c811f09af24ea1906f2b27d29b043aa1725ae490dac3549a7b62",
+				"ac8a2cd48569a3b359fb7b277cea619196c9b88163542be661e009fa2afc4ff0",
+				"ce556ba29ec5c2fd797fed1fca04e672e1513b858caab473ad9ac5f0cbb52a91",
 			},
 			json1: "{\"key1\": [\"a\", \"b\", \"c\"], \"key2\": \"value1\"}",
 			json2: "{\"key1\": [\"a\", \"b\", \"c\"], \"keyX\": \"value1\"}",
@@ -618,11 +616,12 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"d6ce134d7dd3367ee6201869c1ee642f065b54f200a8023d5ccd6df6417828d5",
-				"cc1d6ab9fd7c8cf07fbf85a1710eab59ebc861f4da193cafbdcfe7784ebf22d2",
+				"0e3cca6969dcc5294cf90792b2cb5253adc51b37ab5b8a17f25dfeef51b798ab",
+				"59fb6a700fb710db7d05e59ca4425b21de4fc754ab8ea1a4ff1ac05d1e70d478",
 			},
 			expectedStringB: []string{
-				"094a72abe8018edc3aa6dabd237f5f405c4d061eb1bba76f14b6a862b818d9d4",
+				"2e2609aeccc418eaf137d9dd04af5de8805e8c031bfd1f7b6d1327dd1db41d1b",
+				"2e2609aeccc418eaf137d9dd04af5de8805e8c031bfd1f7b6d1327dd1db41d1b",
 			},
 			json1: "{\"animal\":{\"name\":\"Cat\",\"attributes\":{\"color\":\"black\",\"age\":5}}}",
 			json2: "{\"animal\":{\"name\":\"Cat\",\"characteristics\":{\"color\":\"black\",\"age\":5}}}",
@@ -641,10 +640,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"c3a5b73b190d32f87ca1720daee024228dd5f98d412841922c92a694dcb6d703",
+				"8ce7332a0338def41749b81e18681136ef5d5efc94be7d949f8dad07c90c1f4c",
 			},
 			expectedStringB: []string{
-				"1e70bf1b139fdd9751e72a2a30ff29ed2f9e799bae557702f817f16f959f434e",
+				"a22ce744527a56924d913ac19c9eb558b2a837caf000b1fbbd76afe281245ced",
 			},
 			json1: "{\"outer\": []}",
 			json2: "{\"outer\": [\"Vary\"]}",
@@ -675,11 +674,35 @@ func TestSprintJSONDiff(t *testing.T) {
 			json2: "{\"zoo\":{\"animals\":[{\"species\":\"mammal\",\"name\":\"Elephant\",\"age\":10},{\"type\":\"bird\",\"name\":\"Parrot\",\"age\":2}]}}",
 			name:  "random key change in deeply nested mixed structures",
 		},
+		{
+			expectedStringA: []string{
+				"29a03b5d51ae5ae3b35affbc646f08b8d77d4c34a001945f125dda0b9d581a7b",
+			},
+			expectedStringB: []string{
+				"aa041336dda91711129ab5d24f1e19d636e819452252ab20da1bf072b21c75f4",
+			},
+			json1:    "{\"key1\": [\"a\", \"b\", \"c\"], \"key2\": \"value1\"}",
+			json2:    "{\"key1\": [\"a\", \"b\", \"d\"], \"keyX\": \"value1\"}",
+			name:     "random key transformation in a map with nested array key changes labeled as noise",
+			isNoised: true,
+			noise: map[string][]string{
+				"key1": {},
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resp, err := CompareJSON([]byte(tt.json1), []byte(tt.json2), map[string][]string{}, false)
+
+			var resp Diff
+			var err error
+
+			if tt.isNoised {
+				resp, err = CompareJSON([]byte(tt.json1), []byte(tt.json2), tt.noise, false)
+			} else {
+				resp, err = CompareJSON([]byte(tt.json1), []byte(tt.json2), map[string][]string{}, false)
+			}
+
 			if err != nil {
 				fmt.Println(err.Error())
 				fmt.Println(resp)
@@ -688,18 +711,17 @@ func TestSprintJSONDiff(t *testing.T) {
 			result := expectActualTable(resp.Expected, resp.Actual, "", false)
 			escapedA := escapedANSIString(resp.Expected)
 			escapedB := escapedANSIString(resp.Actual)
-			if !containsSubstring(tt.expectedStringA, escapedB) {
+			if !containsSubstring(tt.expectedStringA, escapedA) {
 				println(result)
 				println(tt.name)
 				fmt.Printf("\"%s %s\",\n", escapedA, "A")
-				// t.Fail() // Mark the test as failed
+				fmt.Printf("\"%s %s\",\n", escapedB, "B")
+				t.Fail() // Mark the test as failed
 			} else if !containsSubstring(tt.expectedStringB, escapedB) {
 				println(result)
 				println(tt.name)
 				fmt.Printf("\"%s %s \",\n", escapedB, "B")
-				// t.Fail() // Mark the test as failed
-			} else {
-				println(result)
+				t.Fail() // Mark the test as failed
 			}
 
 		})
@@ -743,12 +765,12 @@ func TestSprintHeaderJSONDiff(t *testing.T) {
 				println(result)
 				println(tt.name)
 				fmt.Printf("\"%s %s\",\n", escapedA, "A")
-				// t.Fail() // Mark the test as failed
+				t.Fail() // Mark the test as failed
 			} else if !containsSubstring(tt.expectedStringB, escapedB) {
 				println(result)
 				println(tt.name)
 				fmt.Printf("\"%s %s \",\n", escapedB, "B")
-				// t.Fail() // Mark the test as failed
+				t.Fail() // Mark the test as failed
 			}
 
 		})
