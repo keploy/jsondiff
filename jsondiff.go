@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"regexp"
 	"strings"
 
 	"github.com/fatih/color"
@@ -29,24 +28,19 @@ type Diff struct {
 func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]string, disableColor bool) (Diff, error) {
 	color.NoColor = disableColor
 
-	var expectedType interface{}
-	var actualType interface{}
+	var expectedType, actualType interface{}
 
 	if err := json.Unmarshal(expectedJSON, &expectedType); err != nil {
-		fmt.Println("Error unmarshalling expected JSON")
-		return Diff{}, err
+		return Diff{}, fmt.Errorf("error unmarshalling expected JSON: %w", err)
 	}
 
 	if err := json.Unmarshal(actualJSON, &actualType); err != nil {
-		fmt.Println("Error unmarshalling actual JSON")
-		return Diff{}, err
+		return Diff{}, fmt.Errorf("error unmarshalling actual JSON: %w", err)
 	}
 
-	// Check if types of expected and actual JSON are the same.
-
 	if reflect.TypeOf(expectedType) != reflect.TypeOf(actualType) {
-		expectedJSONString := `Type of expected body: ` + reflect.TypeOf(expectedType).Kind().String()
-		actualJSONString := `Type of actual body: ` + reflect.TypeOf(actualType).Kind().String()
+		expectedJSONString := fmt.Sprintf("Type of expected body: %s", reflect.TypeOf(expectedType).Kind())
+		actualJSONString := fmt.Sprintf("Type of actual body: %s", reflect.TypeOf(actualType).Kind())
 		offset := []int{4}
 
 		highlightExpected := color.FgHiRed
@@ -58,30 +52,23 @@ func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]stri
 		}, nil
 	}
 
-	// Calculate the differences between the two JSON objects.
 	diffString, err := calculateJSONDiffs(expectedJSON, actualJSON)
 	if err != nil || diffString == "" {
 		return Diff{}, err
 	}
-	// Extract the modified keys from the diff string.
+
 	modifiedKeys := extractKey(diffString)
 
-	t := reflect.TypeOf(expectedType)
-
-	if t.Kind() == reflect.Map {
-		// Check if the modified keys exist in the provided maps and add additional context if they do.
-		contextInfo, exists, error := checkKeyInMaps(expectedJSON, actualJSON, modifiedKeys)
-
-		if error != nil {
-			return Diff{}, error
+	if reflect.TypeOf(expectedType).Kind() == reflect.Map {
+		contextInfo, exists, err := checkKeyInMaps(expectedJSON, actualJSON, modifiedKeys)
+		if err != nil {
+			return Diff{}, err
 		}
-
 		if exists {
 			diffString = contextInfo + "\n" + diffString
 		}
 	}
 
-	// Separate and colorize the diff string into expected and actual outputs.
 	expect, actual := separateAndColorize(diffString, noise)
 
 	return Diff{
@@ -150,26 +137,20 @@ func checkKeyInMaps(expectedJSONMap, actualJSONMap []byte, targetKey string) (st
 // Returns a string representing the differences and an error if any.
 func calculateJSONDiffs(expectedJSON, actualJSON []byte) (string, error) {
 	expectedJSON, err := normalizeJSON(expectedJSON)
-
 	if err != nil {
-		fmt.Println("Error normalizing expected JSON")
-		return "", err
+		return "", fmt.Errorf("error normalizing expected JSON: %w", err)
 	}
 
 	actualJSON, err = normalizeJSON(actualJSON)
-
 	if err != nil {
-		fmt.Println("Error normalizing actual JSON")
-		return "", err
+		return "", fmt.Errorf("error normalizing actual JSON: %w", err)
 	}
 
-	// Parse both JSON objects.
 	expectedResult := gjson.ParseBytes(expectedJSON)
 	actualResult := gjson.ParseBytes(actualJSON)
 
 	var diffs []string
 
-	// Iterate over key-value pairs in the expected JSON and compare with the actual JSON.
 	expectedResult.ForEach(func(key, expectedValue gjson.Result) bool {
 		actualValue := actualResult.Get(key.String())
 		if !actualValue.Exists() || expectedValue.String() != actualValue.String() {
@@ -181,7 +162,6 @@ func calculateJSONDiffs(expectedJSON, actualJSON []byte) (string, error) {
 		return true
 	})
 
-	// Iterate over the key-value pairs in the actual JSON and add any missing keys from the expected JSON.
 	actualResult.ForEach(func(key, actualValue gjson.Result) bool {
 		if !expectedResult.Get(key.String()).Exists() {
 			diffs = append(diffs, fmt.Sprintf("+ \"%s\": %v", key, actualValue))
@@ -189,7 +169,6 @@ func calculateJSONDiffs(expectedJSON, actualJSON []byte) (string, error) {
 		return true
 	})
 
-	// Join the diffs into a single string separated by newlines.
 	return strings.Join(diffs, "\n"), nil
 }
 
@@ -202,15 +181,17 @@ func extractKey(diffString string) string {
 
 	// Iterate over each line in the diff string.
 	for _, line := range diffLines {
-		// Remove the leading '-' or '+' and any surrounding spaces
-		line = strings.TrimSpace(line[1:])
+		// Ensure the line has at least one character to avoid index out of range error
+		if len(line) > 1 {
+			// Remove the leading '-' or '+' and any surrounding spaces
+			line = strings.TrimSpace(line[1:])
 
-		if colonIndex := strings.Index(line, ":"); colonIndex != -1 {
-			// Extract and clean up the key
-			key := strings.Trim(line[:colonIndex], `"'`)
-			keys = append(keys, key)
+			if colonIndex := strings.Index(line, ":"); colonIndex != -1 {
+				// Extract and clean up the key
+				key := strings.Trim(line[:colonIndex], `"'`)
+				keys = append(keys, key)
+			}
 		}
-		// Add the key to the list of keys.
 	}
 
 	// Join the keys into a single string separated by a pipe character.
@@ -256,83 +237,73 @@ func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, 
 // red, green: Functions to apply red and green colors respectively for differences.
 // Returns two strings: the colorized differences for the expected and actual slices.
 func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func(a ...interface{}) string, jsonPath string, noise map[string][]string) (string, string) {
-	var expectedOutput strings.Builder // Builder for the expected output string.
-	var actualOutput strings.Builder   // Builder for the actual output string.
-	maxLength := len(a)                // Determine the maximum length between the two slices.
-	if len(b) > maxLength {
-		maxLength = len(b)
-	}
+	var expectedOutput, actualOutput strings.Builder
+	maxLength := max(len(a), len(b))
 
-	// Iterate over the elements of the slices up to the maximum length.
 	for i := 0; i < maxLength; i++ {
-		var aValue, bValue interface{}
-		aExists, bExists := i < len(a), i < len(b) // Flags to indicate if values exist in both slices
-
-		// Assign the current element from the first slice if within bounds.
-		if aExists {
-			aValue = a[i]
-		}
-
-		// Assign the current element from the second slice if within bounds.
-		if bExists {
-			bValue = b[i]
-		}
-
-		// Use a switch to handle the cases based on the existence of values in both slices.
+		aValue, bValue, aExists, bExists := getValuesAtIndex(a, b, i)
 		switch {
 		case !aExists && !bExists:
-			// If neither value exists, continue the loop.
 			continue
-
 		case !aExists:
-			// Only the second slice has a value.
 			actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, green(serialize(bValue))))
-
 		case !bExists:
-			// Only the first slice has a value.
 			expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, red(serialize(aValue))))
-
 		default:
-			// If both elements exist, compare and colorize them.
-			switch v1 := aValue.(type) {
-			case map[string]interface{}:
-				if v2, ok := bValue.(map[string]interface{}); ok {
-					// Recursively compare and colorize maps.
-					prefixedValue := jsonPath + "[" + fmt.Sprint(i) + "]"
-					expectedText, actualText := compareAndColorizeMaps(v1, v2, indent+"  ", red, green, prefixedValue, noise)
-					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, expectedText))
-					actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, actualText))
-					continue
-				}
-
-			case []interface{}:
-				if v2, ok := bValue.([]interface{}); ok {
-					// Recursively compare and colorize slices.
-					prefixedValue := jsonPath + "[" + fmt.Sprint(i) + "]"
-					expectedText, actualText := compareAndColorizeSlices(v1, v2, indent+"  ", red, green, prefixedValue, noise)
-					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, i, expectedText, indent))
-					actualOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, i, actualText, indent))
-					continue
-				}
-
-			default:
-				// If values are not deeply equal, write the values with colors.
-				prefixedValue := jsonPath + "[" + fmt.Sprint(i) + "]"
-				isNoised := checkNoise(prefixedValue, noise)
-				if reflect.DeepEqual(aValue, bValue) || isNoised {
-					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, aValue))
-					actualOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, bValue))
-					continue
-				}
-			}
-			// If the values are not equal, colorize them.
-			expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, red(serialize(aValue))))
-			actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, i, green(serialize(bValue))))
+			compareAndColorizeValues(aValue, bValue, indent, i, red, green, jsonPath, noise, &expectedOutput, &actualOutput)
 		}
 	}
 
-	// Return the resulting colorized differences for the expected and actual slices.
 	return expectedOutput.String(), actualOutput.String()
+}
+
+func getValuesAtIndex(a, b []interface{}, index int) (aValue, bValue interface{}, aExists, bExists bool) {
+	aExists, bExists = index < len(a), index < len(b)
+	if aExists {
+		aValue = a[index]
+	}
+	if bExists {
+		bValue = b[index]
+	}
+	return
+}
+
+func compareAndColorizeValues(aValue, bValue interface{}, indent string, index int, red, green func(a ...interface{}) string, jsonPath string, noise map[string][]string, expectedOutput, actualOutput *strings.Builder) {
+	switch v1 := aValue.(type) {
+	case map[string]interface{}:
+		if v2, ok := bValue.(map[string]interface{}); ok {
+			prefixedValue := jsonPath + "[" + fmt.Sprint(index) + "]"
+			expectedText, actualText := compareAndColorizeMaps(v1, v2, indent+"  ", red, green, prefixedValue, noise)
+			expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, index, expectedText))
+			actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, index, actualText))
+			return
+		}
+	case []interface{}:
+		if v2, ok := bValue.([]interface{}); ok {
+			prefixedValue := jsonPath + "[" + fmt.Sprint(index) + "]"
+			expectedText, actualText := compareAndColorizeSlices(v1, v2, indent+"  ", red, green, prefixedValue, noise)
+			expectedOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, index, expectedText, indent))
+			actualOutput.WriteString(fmt.Sprintf("%s[%d]: [\n%s%s]\n", indent, index, actualText, indent))
+			return
+		}
+	default:
+		prefixedValue := jsonPath + "[" + fmt.Sprint(index) + "]"
+		isNoised := checkNoise(prefixedValue, noise)
+		if reflect.DeepEqual(aValue, bValue) || isNoised {
+			expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, index, aValue))
+			actualOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, index, bValue))
+			return
+		}
+	}
+	expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, index, red(serialize(aValue))))
+	actualOutput.WriteString(fmt.Sprintf("%s[%d]: %s\n", indent, index, green(serialize(bValue))))
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 // serialize serializes a value to a pretty-printed JSON string.
@@ -740,10 +711,6 @@ func insertEmptyLines(lines []string) []string {
 	// Return the result slice with inserted empty lines.
 	return result
 }
-
-var ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
-
-var ansiResetCode = "\x1b[0m"
 
 // truncateToMatchWithEllipsis truncates the input strings to a specified length, adding ellipses in the middle.
 // expectedText: The input string representing the expected text.
