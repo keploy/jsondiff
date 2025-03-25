@@ -823,7 +823,6 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 			continue
 		}
 		if !bHasKey { // If the key does not exist in the second map.
-			fmt.Println("idhar check for ", key)
 			writeKeyValuePair(&expectedOutput, red(key), aValue, indent+"  ", red) // Write the key-value pair with red color.
 			continue                                                               // Move to the next key-value pair.
 		}
