@@ -815,11 +815,18 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 	// Iterate over each key-value pair in the first map.
 	for key, aValue := range a {
 		bValue, bHasKey := b[key] // Get the corresponding value from the second map and check if the key exists.
-		if !bHasKey {             // If the key does not exist in the second map.
+		if aValue == nil && !bHasKey {
+			expectedOutput.WriteString(fmt.Sprintf("%s\"%s\": \"Unsupported Type\",\n", indent+"  ", red(key)))
+			continue
+		}
+		if aValue == nil && bValue == nil {
+			continue
+		}
+		if !bHasKey { // If the key does not exist in the second map.
+			fmt.Println("idhar check for ", key)
 			writeKeyValuePair(&expectedOutput, red(key), aValue, indent+"  ", red) // Write the key-value pair with red color.
 			continue                                                               // Move to the next key-value pair.
 		}
-
 		// Compare the values for the current key in both maps.
 		compare(key, aValue, bValue, indent+"  ", &expectedOutput, &actualOutput, red, green, jsonPath, noise)
 	}
