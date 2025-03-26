@@ -226,7 +226,7 @@ func extractKey(diffString string) string {
 func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, indent string, applyColor func(a ...interface{}) string) {
 	// Serialize the value to a pretty-printed JSON string.
 	if value == nil {
-		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, "null"))
+		builder.WriteString(fmt.Sprintf("%s\"%s\": null,\n", indent, key))
 		return
 	}
 	switch reflect.TypeOf(value).Kind() {
@@ -820,8 +820,8 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 	for key, aValue := range a {
 		bValue, bHasKey := b[key] // Get the corresponding value from the second map and check if the key exists.
 		if aValue == nil && !bHasKey {
-			expectedOutput.WriteString(fmt.Sprintf("%s\"%s\": \"Unsupported Type\",\n", indent+"  ", red(key)))
-			actualOutput.WriteString(fmt.Sprintf("%s\"%s\": null,\n", indent+"  ", red(key)))
+			actualOutput.WriteString(fmt.Sprintf("%s\"%s\": \"Unsupported Type\",\n", indent+"  ", red(key)))
+			expectedOutput.WriteString(fmt.Sprintf("%s\"%s\": null,\n", indent+"  ", key))
 			continue
 		}
 		if aValue == nil && bValue == nil {
