@@ -225,31 +225,31 @@ func extractKey(diffString string) string {
 // colorFunc: The function to apply color to the value, if provided.
 func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, indent string, applyColor func(a ...interface{}) string) {
 	// Serialize the value to a pretty-printed JSON string.
-	if (value ==nil){
+	if value == nil {
 		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, "null"))
-	}else{
-		switch reflect.TypeOf(value).Kind() {
-		case reflect.Map:
-			formattedValue := applyColor("{ ... }")
-	
-			builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
-		case reflect.Slice:
-			formattedValue := applyColor("[ ... ]")
-	
-			builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
-		default:
-	
-			serializedValue, _ := json.MarshalIndent(value, "", "  ")
-			formattedValue := string(serializedValue)
-	
-			// Check if a color function is provided and the value is not empty.
-			if applyColor != nil && value != "" {
-				formattedValue = applyColor(formattedValue)
-			}
-	
-			// Write the key-value pair to the builder with or without colorization.
-			builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
+		return
+	}
+	switch reflect.TypeOf(value).Kind() {
+	case reflect.Map:
+		formattedValue := applyColor("{ ... }")
+
+		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
+	case reflect.Slice:
+		formattedValue := applyColor("[ ... ]")
+
+		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
+	default:
+
+		serializedValue, _ := json.MarshalIndent(value, "", "  ")
+		formattedValue := string(serializedValue)
+
+		// Check if a color function is provided and the value is not empty.
+		if applyColor != nil && value != "" {
+			formattedValue = applyColor(formattedValue)
 		}
+
+		// Write the key-value pair to the builder with or without colorization.
+		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
 	}
 }
 
