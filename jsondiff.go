@@ -225,6 +225,10 @@ func extractKey(diffString string) string {
 // colorFunc: The function to apply color to the value, if provided.
 func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, indent string, applyColor func(a ...interface{}) string) {
 	// Serialize the value to a pretty-printed JSON string.
+	if value == nil {
+		builder.WriteString(fmt.Sprintf("%s\"%s\": null,\n", indent, key))
+		return
+	}
 	switch reflect.TypeOf(value).Kind() {
 	case reflect.Map:
 		formattedValue := applyColor("{ ... }")
@@ -815,11 +819,18 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 	// Iterate over each key-value pair in the first map.
 	for key, aValue := range a {
 		bValue, bHasKey := b[key] // Get the corresponding value from the second map and check if the key exists.
-		if !bHasKey {             // If the key does not exist in the second map.
+		if aValue == nil && !bHasKey {
+			actualOutput.WriteString(fmt.Sprintf("%s\"%s\": \"Unsupported Type\",\n", indent+"  ", red(key)))
+			expectedOutput.WriteString(fmt.Sprintf("%s\"%s\": null,\n", indent+"  ", key))
+			continue
+		}
+		if aValue == nil && bValue == nil {
+			continue
+		}
+		if !bHasKey { // If the key does not exist in the second map.
 			writeKeyValuePair(&expectedOutput, red(key), aValue, indent+"  ", red) // Write the key-value pair with red color.
 			continue                                                               // Move to the next key-value pair.
 		}
-
 		// Compare the values for the current key in both maps.
 		compare(key, aValue, bValue, indent+"  ", &expectedOutput, &actualOutput, red, green, jsonPath, noise)
 	}
