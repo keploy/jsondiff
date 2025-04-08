@@ -70,10 +70,10 @@ func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]stri
 
 	if t.Kind() == reflect.Map {
 		// Check if the modified keys exist in the provided maps and add additional context if they do.
-		contextInfo, exists, error := checkKeyInMaps(expectedJSON, actualJSON, modifiedKeys)
+		contextInfo, exists, err := checkKeyInMaps(expectedJSON, actualJSON, modifiedKeys)
 
-		if error != nil {
-			return Diff{}, error
+		if err != nil {
+			return Diff{}, err
 		}
 
 		if exists {
@@ -203,7 +203,9 @@ func extractKey(diffString string) string {
 	// Iterate over each line in the diff string.
 	for _, line := range diffLines {
 		// Remove the leading '-' or '+' and any surrounding spaces
-		line = strings.TrimSpace(line[1:])
+		if len(line) > 1 {
+			line = strings.TrimSpace(line[1:])
+		}
 
 		if colonIndex := strings.Index(line, ":"); colonIndex != -1 {
 			// Extract and clean up the key
