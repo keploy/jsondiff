@@ -33,20 +33,24 @@ func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]stri
 	var actualType interface{}
 
 	if err := json.Unmarshal(expectedJSON, &expectedType); err != nil {
-		fmt.Println("Error unmarshalling expected JSON")
-		return Diff{}, err
+		return Diff{}, fmt.Errorf("error unmarshalling expected JSON: %v", err)
 	}
 
 	if err := json.Unmarshal(actualJSON, &actualType); err != nil {
-		fmt.Println("Error unmarshalling actual JSON")
-		return Diff{}, err
+		return Diff{}, fmt.Errorf("error unmarshalling actual JSON: %v", err)
 	}
 
 	// Check if types of expected and actual JSON are the same.
+	expectedTypeInfo := reflect.TypeOf(expectedType)
+	actualTypeInfo := reflect.TypeOf(actualType)
 
-	if reflect.TypeOf(expectedType) != reflect.TypeOf(actualType) {
-		expectedJSONString := `Type of expected body: ` + reflect.TypeOf(expectedType).Kind().String()
-		actualJSONString := `Type of actual body: ` + reflect.TypeOf(actualType).Kind().String()
+	if expectedTypeInfo == nil || actualTypeInfo == nil {
+		return Diff{}, fmt.Errorf("invalid type information: expectedType=%v, actualType=%v", expectedTypeInfo, actualTypeInfo)
+	}
+
+	if expectedTypeInfo != actualTypeInfo {
+		expectedJSONString := fmt.Sprintf("Type of expected body: %v", expectedTypeInfo.Kind())
+		actualJSONString := fmt.Sprintf("Type of actual body: %v", actualTypeInfo.Kind())
 		offset := []int{4}
 
 		highlightExpected := color.FgHiRed
