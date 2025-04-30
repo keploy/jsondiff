@@ -1,4 +1,4 @@
-module github.com/harshitashankar/jsonDiff
+module github.com/keploy/jsonDiff
 
 go 1.22
 
