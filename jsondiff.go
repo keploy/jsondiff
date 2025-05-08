@@ -824,8 +824,16 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 	expectedOutput.WriteString("{\n")                // Start the expected output with an opening brace and newline.
 	actualOutput.WriteString("{\n")                  // Start the actual output with an opening brace and newline.
 
-	// Iterate over each key-value pair in the first map.
-	for key, aValue := range a {
+	// Get all keys and sort them
+	keys := make([]string, 0, len(a))
+	for key := range a {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	// Iterate over each key-value pair in the first map in sorted order
+	for _, key := range keys {
+		aValue := a[key]
 		bValue, bHasKey := b[key] // Get the corresponding value from the second map and check if the key exists.
 		if aValue == nil && !bHasKey {
 			actualOutput.WriteString(fmt.Sprintf("%s\"%s\": \"Unsupported Type\",\n", indent+"  ", red(key)))
@@ -843,16 +851,24 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 		compare(key, aValue, bValue, indent+"  ", &expectedOutput, &actualOutput, red, green, jsonPath, noise)
 	}
 
-	// Iterate over each key-value pair in the second map.
-	for key, bValue := range b {
-		if _, aHasKey := a[key]; !aHasKey { // If the key does not exist in the first map.
-			jsonPath = jsonPath + "." + key
+	// Get all keys from second map that aren't in first map
+	extraKeys := make([]string, 0)
+	for key := range b {
+		if _, exists := a[key]; !exists {
+			extraKeys = append(extraKeys, key)
+		}
+	}
+	sort.Strings(extraKeys)
 
-			isNoised := checkNoise(jsonPath, noise)
+	// Iterate over each key-value pair in the second map that wasn't in the first map
+	for _, key := range extraKeys {
+		bValue := b[key]
+		jsonPath = jsonPath + "." + key
 
-			if !isNoised {
-				writeKeyValuePair(&actualOutput, green(key), bValue, indent+"  ", green) // Write the key-value pair with green color.
-			}
+		isNoised := checkNoise(jsonPath, noise)
+
+		if !isNoised {
+			writeKeyValuePair(&actualOutput, green(key), bValue, indent+"  ", green) // Write the key-value pair with green color.
 		}
 	}
 
