@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/fatih/color"
@@ -44,8 +45,11 @@ func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]stri
 	expectedTypeInfo := reflect.TypeOf(expectedType)
 	actualTypeInfo := reflect.TypeOf(actualType)
 
-	if expectedTypeInfo == nil || actualTypeInfo == nil {
-		return Diff{}, fmt.Errorf("invalid type information: expectedType=%v, actualType=%v", expectedTypeInfo, actualTypeInfo)
+	if expectedTypeInfo == nil {
+		return Diff{}, fmt.Errorf("invalid type information: expectedType is nil")
+	}
+	if actualTypeInfo == nil {
+		return Diff{}, fmt.Errorf("invalid type information: actualType is nil")
 	}
 
 	if expectedTypeInfo != actualTypeInfo {
@@ -866,11 +870,26 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 func CompareHeaders(expectedHeaders, actualHeaders map[string]string) Diff {
 	var expectAll, actualAll strings.Builder // Builders for the resulting strings.
 
-	// Iterate over each key-value pair in the expected map.
-	for key, expValue := range expectedHeaders {
-		actValue := actualHeaders[key] // Get the corresponding value from the actual map.
+	// Get all unique keys from both maps and sort them
+	keys := make(map[string]bool)
+	for k := range expectedHeaders {
+		keys[k] = true
+	}
+	for k := range actualHeaders {
+		keys[k] = true
+	}
 
-		// Calculate the offsets of the differences between the expected and actual values.
+	sortedKeys := make([]string, 0, len(keys))
+	for k := range keys {
+		sortedKeys = append(sortedKeys, k)
+	}
+	sort.Strings(sortedKeys)
+
+	// Iterate over sorted keys
+	for _, key := range sortedKeys {
+		expValue := expectedHeaders[key]
+		actValue := actualHeaders[key]
+
 		offsetsStr1, offsetsStr2, _ := diffArrayRange(string(expValue), string(actValue))
 
 		// Define colors for highlighting differences.
