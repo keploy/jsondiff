@@ -146,7 +146,7 @@ func TestSprintJSONDiff(t *testing.T) {
 				"f71cbcb39804b502c41125d03be6c699baafa15efba8bbb5aef0b111039b2a87",
 				"fa012aa280e519ccb558663c5728faea94ed020988c83653a796926c35902ec0",
 				"ef0a5b31ffc0a36df02dcc08898cad0b92857cd1405cad0feefc18d888bf57d0",
-				"e0236118ff8532288842ad67be5bca9f81b15191ee2efc2eee077406fabf8bbd",
+				"f8372dde292cf76ca84f07227882caa214ad034e6d3a80e5365af78dc3f21e81",
 				"c828a0590dbd6e6eefbee21c5855b19a8bff98930f0219816fe6f24c3705c5cb",
 				"17f1dc518cda544ae5ff4b2479e94d5ef811e542b387608dfe7b44e42937e452",
 			},
@@ -155,7 +155,7 @@ func TestSprintJSONDiff(t *testing.T) {
 				"8fe4e8830eb84cdacd2cbd60f62fc5d50dcecf3a5cc439ea7e24d87d4257c6a8",
 				"e765848380611cb81996ea9908ade2ee8940c21d72a84fd19ce1d1d6ddfa8e2a",
 				"001ff4d6bf9821bb067c73812ba5900574dd161d813f10623ba2515fdbed0f88",
-				"19018c74ffe402eb59202aadc1cab4f5c8171c96ba50f4621ab9d72f3b18914e",
+				"c9da677f57ff1bf284a8108868c6cf1d9daa2ec3587c8a95b4e4542c00cef5dd",
 				"0bd78116662eba5d4fa8bbc64f81afbd879fb2e73cd6d85105e1f9bf3a658ae0",
 				"d11e6a5e5047d70f5e5633650bc4b3fd7a588d126fb785e5ac42b92fbf3e44f6",
 			},
@@ -289,7 +289,7 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"7fb2c228f44a66eb262804bd7c21049dcfbb265173cf24deb4842e521ee983b2",
+				"27d4343ebcc5f8354709cecc05b0e4001085233f82fb6424fe176f44f59f1e9a",
 				"30aef022f108468def1ab4e9c2f7bc955dd88234b7fa6d6b4fa36584b9373830",
 				"c3e49694ce1509a2bf9f6557c4fc643d1efc1ef98dd9a7c18cbe2fb96bdc5109",
 				"7470cc614de3e68eb00d38f087b208d73822244dca550c3103caa61d7bc16f3f",
@@ -304,7 +304,7 @@ func TestSprintJSONDiff(t *testing.T) {
 			expectedStringB: []string{
 				"fb916cbcb8a9c8accb60f436b7ae49d404a6815d81cb67aae9236d41713ecb2c",
 				"56d4dd69bc7d542a099e6200f2b6d5d024f747e8fc8f493ca9d0a449cc63d1c3",
-				"d458672f27aa045490d25f180b1e5b81d8d6da09035731127ffb27eca9002942",
+				"21496320cfc4ca51f19b717d80dc325a4f598b3537b023c5026aee06c227353d",
 				"8211a861b8ec0d7ce838850e29a9a31a352abcccdb045cb86cd8c8d8721dcd20",
 				"b54c3ce37beedd7f27b98563770c930887474a00f8471252a95a4fd8e4b8b1fa",
 				"70e5515e928a51a26c2d78315c677bd841b6118ca4f8f9843b349257a0fafa1e",
@@ -322,7 +322,7 @@ func TestSprintJSONDiff(t *testing.T) {
 				"8317e30c64967ec9a7d82332831630315a64ab03496dc11851984693ccc6ef3c",
 				"507d00b6db2ba429d7bb6fd7cf422e145806761748690714ae4bd7672bb2e41a",
 				"e61a886b811b80831b9a69293200addfefea3ac0a4fbc401422c32b0815353f7",
-				"689295d50d283dfb54cef114968a0b5eebd44613ae313bc9d1719e8a18e4c83d",
+				"897eb927925bc216402ad7206e3a8ac49c834e3958900786667bd714ef1b8f1f",
 				"2622053f90dead9c5bbad099944c3736877f2d65ce9bb716b782b2467936b27c",
 				"e94990f2032dca084904454bdd78da23ae7de904aea3620b4b6e3a0b0ff85f96",
 				"52c0d440ad1a7658e150f9fd60328042f32cff5695290d00af86b915f814d55b",
@@ -338,7 +338,7 @@ func TestSprintJSONDiff(t *testing.T) {
 			expectedStringB: []string{
 				"82ef5e26330856df883b55e13725a1b71c56f787ab8b8e1d47d6df69ddf7121d",
 				"275e4bec238e61b624affaf51ece1beaa5e1d3cb08d875a501e6f0a32e6b6474",
-				"5b43d1d31702c9e74b93420fe30a3e64988edeb18b5aa7c6030108ab5ca43ccc",
+				"22fb469d471af3159f3a84a94179b36b27af4eb51bcbc07dec399d4dd502d624",
 				"7112d7ed41c984911e7716bf7791972e4d4712e59578a9a6efe565632c162076",
 				"cf358de4037ee1daf5a36d4b6b89ded7aced41b6ac1a8ec0bcc9e063607eb194",
 				"78970da2cca7e3dfa6c46b4136603259b56eccc3083d51cd2bc190648e7f9dc1",
@@ -358,7 +358,7 @@ func TestSprintJSONDiff(t *testing.T) {
 				"ef4dd42bb9dc629bbfade57743e72663c9a5d236c0e92cb4ce8c80e0d1304350",
 				"ef0a5b31ffc0a36df02dcc08898cad0b92857cd1405cad0feefc18d888bf57d0",
 				"f71cbcb39804b502c41125d03be6c699baafa15efba8bbb5aef0b111039b2a87",
-				"e0236118ff8532288842ad67be5bca9f81b15191ee2efc2eee077406fabf8bbd",
+				"f8372dde292cf76ca84f07227882caa214ad034e6d3a80e5365af78dc3f21e81",
 				"17f1dc518cda544ae5ff4b2479e94d5ef811e542b387608dfe7b44e42937e452",
 			},
 			expectedStringB: []string{
@@ -366,12 +366,12 @@ func TestSprintJSONDiff(t *testing.T) {
 				"e765848380611cb81996ea9908ade2ee8940c21d72a84fd19ce1d1d6ddfa8e2a",
 				"d79b35acf01b0f5138699ff1cc49ea89373b8ebf7e96118b839586a28c28bbee",
 				"001ff4d6bf9821bb067c73812ba5900574dd161d813f10623ba2515fdbed0f88",
-				"19018c74ffe402eb59202aadc1cab4f5c8171c96ba50f4621ab9d72f3b18914e",
+				"c9da677f57ff1bf284a8108868c6cf1d9daa2ec3587c8a95b4e4542c00cef5dd",
 				"d11e6a5e5047d70f5e5633650bc4b3fd7a588d126fb785e5ac42b92fbf3e44f6",
 			},
 			json1: "{\"books\":[{\"title\":\"Book A\",\"author\":{\"name\":\"Author 1\"}},{\"title\":\"Book B\",\"author\":{\"name\":\"Author 2\"}}]}",
 			json2: "{\"books\":[{\"title\":\"Book B\",\"author\":{\"name\":\"Author 2\"}},{\"title\":\"Book A\",\"author\":{\"name\":\"Author 1\"}}]}",
-			name:  "different arrays with nested objects",
+			name:  "different arrays with nested objects2",
 		},
 		{
 			expectedStringA: []string{
@@ -654,7 +654,7 @@ func TestSprintJSONDiff(t *testing.T) {
 			expectedStringA: []string{
 				"912c9262d67b66c88213a4852e320d9b8510756699fe6ee449ee88dbf8426194",
 				"7276fdfc263d1cc56e82703e3010ee8537faa23d8ad824e6920c96b30a47da04",
-				"b5569dffab784f8cd870abad4b63dd22ba0c2b8b9859bfed3c480a9aed116401",
+				"225753634629e212ae856780142e39ba2a2a8607e1f7ef352ff1527ce71d5954",
 				"5a1757013adc054b5c39f94fa645d620089a217630352a411c9dbee947a71763",
 				"a7e01095237d895cb826f0253e0d826f1c9f08ec8c06872da68e08af06a7bfa7",
 				"8c716c74148982037debf428df67b70b4b87c256760c3ece8e05c26b3b86cb32",
@@ -665,7 +665,7 @@ func TestSprintJSONDiff(t *testing.T) {
 			expectedStringB: []string{
 				"d4d0e98483b84858b909008fc80feb15ea1be34f3d8f08a4fba2256d3297cda4",
 				"75c41d6b1061be75ba87dfa384bebf58f157b135cb30c2138804811188a150aa",
-				"49a5be54a87c48e0f54e7d4b977d108e7eba92a65f49cd59955e4d20b7145ec0",
+				"dca54c9e5cb4d08318a33d0067d071d6a6e63e350db7beab7fbfe0f8f761b8be",
 				"875ba3013d34c16df7151d3b8df14e72a02aa69183051a48879dc1ae4b1b5b4b",
 				"8d682e6444c028e9069ce1aafba947e5200bbb1d5bdb670bd7ca01db01536b9d",
 				"3edb3572889e9ca3ba8fdcbcff05ed25daa8197d4f271022e1232eb6a89ed2b2",
@@ -784,6 +784,8 @@ func escapedANSIString(s string) string {
 }
 func computeHash(s string) string {
 	hash := sha256.Sum256([]byte(s))
+	fmt.Print("computeHash op:")
+	fmt.Println(hex.EncodeToString(hash[:]))
 	return hex.EncodeToString(hash[:])
 }
 
