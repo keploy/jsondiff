@@ -330,7 +330,11 @@ func compareAndColorizeSlices(a, b []interface{}, indent string, red, green func
 			default:
 				// If values are not deeply equal, write the values with colors.
 				prefixedValue := jsonPath + "[" + fmt.Sprint(i) + "]"
-				isNoised := checkNoise(prefixedValue, noise)
+				isNoised, regexArray := checkNoise(prefixedValue, noise)
+
+				if isNoised && len(regexArray) > 0 {
+					isNoised, _ = MatchesAnyRegex(InterfaceToString(aValue), regexArray)
+				}
 				if reflect.DeepEqual(aValue, bValue) || isNoised {
 					expectedOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, aValue))
 					actualOutput.WriteString(fmt.Sprintf("%s[%d]: %v\n", indent, i, bValue))
@@ -367,9 +371,9 @@ func serialize(value interface{}) string {
 func compare(key string, val1, val2 interface{}, indent string, expect, actual *strings.Builder, red, green func(a ...interface{}) string, jsonPath string, noise map[string][]string) {
 	jsonPath = jsonPath + "." + key
 
-	isNoised := checkNoise(jsonPath, noise)
+	isNoised, regexArray := checkNoise(jsonPath, noise)
 
-	if isNoised {
+	if isNoised && len(regexArray) == 0 {
 		return
 	}
 
@@ -411,8 +415,9 @@ func compare(key string, val1, val2 interface{}, indent string, expect, actual *
 
 	// Default case for other types
 	default:
+		isNoised, _ := MatchesAnyRegex(InterfaceToString(val1), regexArray)
 		// Check if the values are not deeply equal
-		if !reflect.DeepEqual(val1, val2) {
+		if !reflect.DeepEqual(val1, val2) && !isNoised {
 			// Marshal values to pretty-printed JSON strings
 			val1Str, err := json.MarshalIndent(val1, "", "  ")
 			if err != nil {
@@ -435,12 +440,16 @@ func compare(key string, val1, val2 interface{}, indent string, expect, actual *
 			return
 		}
 		// If values are equal, write the value without color
-		valStr, err := json.MarshalIndent(val1, "", "  ")
+		valStr1, err := json.MarshalIndent(val1, "", "  ")
 		if err != nil {
 			return
 		}
-		expect.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, string(valStr)))
-		actual.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, string(valStr)))
+		valStr2, err := json.MarshalIndent(val2, "", "  ")
+		if err != nil {
+			return
+		}
+		expect.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, string(valStr1)))
+		actual.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, string(valStr2)))
 
 	}
 }
@@ -529,8 +538,8 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				if actualKey != expectKey {
 					continue
 				}
-				isNoised := checkNoise(actualKey, noise)
-				if isNoised {
+				isNoised, regexArray := checkNoise(actualKey[:len(actualKey)-1], noise)
+				if isNoised && len(regexArray) == 0 {
 					continue
 				}
 				expectedText, actualText = compareAndColorizeSlices(expectsArray, actualsArray, " ", red, green, intialJsonPath, noise)
@@ -848,7 +857,11 @@ func compareAndColorizeMaps(a, b map[string]interface{}, indent string, red, gre
 		if _, aHasKey := a[key]; !aHasKey { // If the key does not exist in the first map.
 			jsonPath = jsonPath + "." + key
 
-			isNoised := checkNoise(jsonPath, noise)
+			isNoised, regexArray := checkNoise(jsonPath, noise)
+
+			if len(regexArray) != 0 {
+				isNoised = false
+			}
 
 			if !isNoised {
 				writeKeyValuePair(&actualOutput, green(key), bValue, indent+"  ", green) // Write the key-value pair with green color.
@@ -1047,13 +1060,38 @@ func normalizeJSON(input []byte) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func checkNoise(key string, noise map[string][]string) bool {
+func checkNoise(key string, noise map[string][]string) (bool, []string) {
 	key = strings.TrimPrefix(key, ".")
 	key = strings.ToLower(key)
-	for e := range noise {
-		if strings.Contains(key, e) {
-			return true
+
+	if v2, ok := noise[key]; ok {
+		return true, v2
+	}
+
+	return false, []string{} // Return false if no noise path matched
+}
+
+func MatchesAnyRegex(str string, regexArray []string) (bool, string) {
+	for _, pattern := range regexArray {
+		re := regexp.MustCompile(pattern)
+		if re.MatchString(str) {
+			return true, pattern
 		}
 	}
-	return false // Return false if no noise path matched
+	return false, ""
+}
+
+func InterfaceToString(val interface{}) string {
+	switch v := val.(type) {
+	case int:
+		return fmt.Sprintf("%d", v)
+	case float64:
+		return fmt.Sprintf("%f", v)
+	case bool:
+		return fmt.Sprintf("%t", v)
+	case string:
+		return v
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }
