@@ -784,8 +784,6 @@ func escapedANSIString(s string) string {
 }
 func computeHash(s string) string {
 	hash := sha256.Sum256([]byte(s))
-	fmt.Print("computeHash op:")
-	fmt.Println(hex.EncodeToString(hash[:]))
 	return hex.EncodeToString(hash[:])
 }
 
