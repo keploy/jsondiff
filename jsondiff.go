@@ -62,8 +62,8 @@ func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]stri
 		highlightActual := color.FgHiGreen
 
 		return Diff{
-			Expected: breakSliceWithColor(expectedJSONString, &highlightExpected, offset),
-			Actual:   breakSliceWithColor(actualJSONString, &highlightActual, offset),
+			Expected: truncateStringWithEllipsis(breakSliceWithColor(expectedJSONString, &highlightExpected, offset), highlightExpected),
+			Actual:   truncateStringWithEllipsis(breakSliceWithColor(actualJSONString, &highlightActual, offset), highlightActual),
 		}, nil
 	}
 
@@ -112,8 +112,8 @@ func Compare(expectedJSON, actualJSON string) Diff {
 	highlightActual := color.FgHiGreen
 
 	// Colorize the differences in the expected and actual JSON strings.
-	colorizedExpected := breakSliceWithColor(expectedJSON, &highlightExpected, offsetExpected)
-	colorizedActual := breakSliceWithColor(actualJSON, &highlightActual, offsetActual)
+	colorizedExpected := truncateStringWithEllipsis(breakSliceWithColor(expectedJSON, &highlightExpected, offsetExpected), highlightExpected)
+	colorizedActual := truncateStringWithEllipsis(breakSliceWithColor(actualJSON, &highlightActual, offsetActual), highlightActual)
 
 	// Return the colorized differences in a Diff struct.
 	return Diff{
