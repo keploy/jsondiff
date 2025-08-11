@@ -20,6 +20,8 @@ type colorRange struct {
 	End   int // End is the ending index of the range.
 }
 
+const maxCharactersLength = 30
+
 // Diff holds the colorized differences between the expected and actual JSON responses.
 // Expected: The colorized string representing the differences in the expected JSON response.
 // Actual: The colorized string representing the differences in the actual JSON response.
@@ -251,8 +253,8 @@ func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, 
 		serializedValue, _ := json.MarshalIndent(value, "", "  ")
 		formattedValue := string(serializedValue)
 
-		if len(string(serializedValue)) > 30 {
-			formattedValue = string(serializedValue[:30]) + "..."
+		if len(string(serializedValue)) > maxCharactersLength {
+			formattedValue = string(serializedValue[:maxCharactersLength]) + "..."
 		}
 
 		// Check if a color function is provided and the value is not empty.
@@ -820,7 +822,7 @@ func truncateToMatchWithEllipsis(expectedText, actualText string) (string, strin
 // truncateStringWithEllipsis truncates a string to a specified length, adding an ellipsis if necessary.
 func truncateStringWithEllipsis(val string, c color.Attribute) string {
 	if !ansiRegex.MatchString(val) {
-		return truncatePlain(val, 20, "...")
+		return truncatePlain(val, maxCharactersLength, "...")
 	}
 
 	colorEllipsis := color.New(c).Sprint("...")
@@ -848,11 +850,11 @@ func truncateStringWithEllipsis(val string, c color.Attribute) string {
 	var out strings.Builder
 	prev := 0
 	for _, r := range coalesced {
-		out.WriteString(truncatePlain(val[prev:r.Start], 20, "..."))
-		out.WriteString(truncateANSISegment(val[r.Start:r.End], 20, colorEllipsis))
+		out.WriteString(truncatePlain(val[prev:r.Start], maxCharactersLength, "..."))
+		out.WriteString(truncateANSISegment(val[r.Start:r.End], maxCharactersLength, colorEllipsis))
 		prev = r.End
 	}
-	out.WriteString(truncatePlain(val[prev:], 20, "..."))
+	out.WriteString(truncatePlain(val[prev:], maxCharactersLength, "..."))
 	return out.String()
 }
 
