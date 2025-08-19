@@ -428,11 +428,13 @@ func TestSprintJSONDiff(t *testing.T) {
 				"49bec237abb42a872e82edee006cb72e8270b4c14179140ce03ebc47ad36fa2d",
 				"3cd84203cf23bffc56c12344c2b2fbf313c1e4ed34f125ea813a50b42adca1d9",
 				"825c067292a1b5ce6ce1724c52fa2068bfb651a35273a65351be3e63d8614df1",
+				"3bf543c95d44ce58e0005887bd44c4ab27d00a0bc1355fd23db30f5ba659a0d1",
 			},
 			expectedStringB: []string{
 				"f3603f2c454c9d81d8cc19296af4e4aff906d102263beea5af3892c223d0ef29",
 				"c25b5b827481d888a7a5551ee05d6ea4590d59d2674fb5182394f13c3adca29a",
 				"d2f1d7f7dcea6764caeab964e34a99e936715959cc066ebd77822bb5daa80316",
+				"beaa58fc7489cf3e180eca7d4ddd2fb5cacaf740df8ecc0b5f822b8a4b3d0c9d",
 			},
 			json1: "{\"longKey\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"nested\":{\"key1\":{\"subkey1\":\"value1\"},\"key2\":{\"subkey2\":\"value2\"}}}",
 			json2: "{\"longKey\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"nested\":{\"key1\":{\"subkey1\":\"value1\"},\"key2\":{\"subkey2\":\"value3\"}}}",
@@ -462,10 +464,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"c9a069dd6d3aaf5052219992d43c57f00d66881849a0004df66ca44d4bcab74d",
+				"9cac2220ac73f8abd3a13d9fbc4249bd481f0188590a26e87f87d354078c9dfa",
 			},
 			expectedStringB: []string{
-				"b6a5cc8d3ef65269d1c729f769d2e64fb501e545b2d2f3306d0359211220b242",
+				"ea18ec7619618dd08777bf00afd74100cf0ae6ea4f914bd26417621b9419a3b8",
 			},
 			json1: "{\"paragraph\":\"This is a long paragraph with many words. The quick brown fox jumps over the lazy dog. A random word will change in the middle of this sentence.\"}",
 			json2: "{\"paragraph\":\"This is a long paragraph with many words. The quick brown fox jumps over the lazy dog. A random word will change in the middle of this phrase.\"}",
@@ -484,10 +486,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"2882d548db56674bf1d45dc423178c66c7dbcc3f7e72d5c2edca479cda04180c",
+				"56a9a0b500759fdb334d3977aac390d18c11fb8e5e10d269ff8f65e034604ea7",
 			},
 			expectedStringB: []string{
-				"9fe5ef3cbbc2103ec21ddf9497a5edba97e546d27f08cad456f208352bf5bc8d",
+				"546b08086b296dc7df590f37e5afb965ed58c129fcc09800bca7416a41515e34",
 			},
 			json1: "{\"longKey\":\"This is a long key with many words and a subtle change at the end of this sentence.\"}",
 			json2: "{\"longKey\":\"This is a long key with many words and a subtle change at the end of this phrase.\"}",
@@ -506,10 +508,10 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"563c5a6b903195cf1e4d408c265edd57ca2f97d818db6ea0b688f30d7b642128",
+				"d190663b3f566e3fc02a1fb599851f1debda96ebf0fdc14e111e52149a99cf25",
 			},
 			expectedStringB: []string{
-				"2e340d7201d7bfbcf9dd8181407fbcbccf993b9b9150bc91c824a17421fb5087",
+				"b0722e878e6f8d4ba5b7bd6ccb1cca44e38d6f9f2e102d23badb4f4e1cae5852",
 			},
 			json1: "{\"level1\":{\"level2\":{\"level3\":{\"longKey\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJmaXJzdE5hbWUiOiJTdGVybGluZyIsImxhc3ROYW1lIjoiU2F1ZXIiLCJlbWFpbCI6Ik1hc29uLkdvbGRuZXI0OUBob3RtYWlsLmNvbSIsInBhc3N3b3JkIjoiZGFhOTMyMGY1YzU4NDRiODRiMjhlMDE2YjRiOGM0MGIiLCJjcmVhdGVkQXQiOiIyMDIzLTEyLTA4VDE4OjE2OjQxLjYzOFoiLCJ1cGRhdGVkQXQiOm51bGwsImRlbGV0ZWRBdCI6bnVsbH0sImlhdCI6MTcxOTM0MzYzOCwiZXhwIjoxNzE5NDMwMDM4fQ.Kgm3Lmbg97M_QQP5Gn9q4suRYEF7_n4ITqehV4i7t_s is a very long value with many descriptive words and phrases to make it lengthy.\"}}}}",
 			json2: "{\"level1\":{\"level2\":{\"level3\":{\"longKey\":\"This is a very long value with many descriptive words and phrases to make it extensive.\"}}}}",
@@ -528,9 +530,9 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"b0d3af312d652a356588bdcddd6f8560cd7700e3532f69405df5dd555b9b1516",
+				"9776cf81505093952b85a8885cd84a713dfdbfc1367ab77de74c066c2d767678",
 			},
-			expectedStringB: []string{"7bac2737756e4613e655b7654087d8467cce2eb039f549c66bd5e1572d9c3a46"},
+			expectedStringB: []string{"c652c8abb9793fc7073a55f9c5126b92a486afd7aadb194397ea88ff09582cfc"},
 			json1:           "{\"level1\":{\"level2\":{\"level3\":{\"longKeyWithMinorChangeA\":\"This is a very long value that remains mostly the same.\"}}}}",
 			json2:           "{\"level1\":{\"level2\":{\"level3\":{\"longKeyWithMinorChangeB\":\"This is a very long value that remains mostly the same.\"}}}}",
 			name:            "long nested structures with slight key changes",
@@ -548,9 +550,9 @@ func TestSprintJSONDiff(t *testing.T) {
 		},
 		{
 			expectedStringA: []string{
-				"67e2232cc42a9f92d7c6871d33a768ed9f7858eb22a00a52f593c1b163eced21",
+				"2cf4331f583b813f6d368fd604c582f860eff645fe98541396095a52d08bf635",
 			},
-			expectedStringB: []string{"59c1bfd3866bc77553c17703b6f5bc69a13c46fba093f6dd09c1d14c15b5a4e7"},
+			expectedStringB: []string{"e8916e02d1a0f3b95983c52e67b122d18f8f7c12f36877bc08e66fdbc841605e"},
 			json1:           "{\"nested\":{\"longParagraph\":\"This is a long paragraph. It contains multiple sentences. Each sentence has many words. One sentence will be different in the second JSON.\"}}",
 			json2:           "{\"nested\":{\"longParagraph\":\"This is a long paragraph. It contains multiple sentences. Each sentence has many words. One phrase will be different in the second JSON.\"}}",
 			name:            "long paragraphs with nested arrays and maps",

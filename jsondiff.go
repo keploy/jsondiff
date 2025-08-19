@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/fatih/color"
 	"github.com/tidwall/gjson"
@@ -18,6 +19,8 @@ type colorRange struct {
 	Start int // Start is the starting index of the range.
 	End   int // End is the ending index of the range.
 }
+
+const maxCharactersLength = 30
 
 // Diff holds the colorized differences between the expected and actual JSON responses.
 // Expected: The colorized string representing the differences in the expected JSON response.
@@ -61,8 +64,8 @@ func CompareJSON(expectedJSON []byte, actualJSON []byte, noise map[string][]stri
 		highlightActual := color.FgHiGreen
 
 		return Diff{
-			Expected: breakSliceWithColor(expectedJSONString, &highlightExpected, offset),
-			Actual:   breakSliceWithColor(actualJSONString, &highlightActual, offset),
+			Expected: truncateStringWithEllipsis(breakSliceWithColor(expectedJSONString, &highlightExpected, offset), highlightExpected),
+			Actual:   truncateStringWithEllipsis(breakSliceWithColor(actualJSONString, &highlightActual, offset), highlightActual),
 		}, nil
 	}
 
@@ -111,8 +114,8 @@ func Compare(expectedJSON, actualJSON string) Diff {
 	highlightActual := color.FgHiGreen
 
 	// Colorize the differences in the expected and actual JSON strings.
-	colorizedExpected := breakSliceWithColor(expectedJSON, &highlightExpected, offsetExpected)
-	colorizedActual := breakSliceWithColor(actualJSON, &highlightActual, offsetActual)
+	colorizedExpected := truncateStringWithEllipsis(breakSliceWithColor(expectedJSON, &highlightExpected, offsetExpected), highlightExpected)
+	colorizedActual := truncateStringWithEllipsis(breakSliceWithColor(actualJSON, &highlightActual, offsetActual), highlightActual)
 
 	// Return the colorized differences in a Diff struct.
 	return Diff{
@@ -247,9 +250,12 @@ func writeKeyValuePair(builder *strings.Builder, key string, value interface{}, 
 
 		builder.WriteString(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, formattedValue))
 	default:
-
 		serializedValue, _ := json.MarshalIndent(value, "", "  ")
 		formattedValue := string(serializedValue)
+
+		if len(string(serializedValue)) > maxCharactersLength {
+			formattedValue = string(serializedValue[:maxCharactersLength]) + "..."
+		}
 
 		// Check if a color function is provided and the value is not empty.
 		if applyColor != nil && value != "" {
@@ -425,13 +431,13 @@ func compare(key string, val1, val2 interface{}, indent string, expect, actual *
 				return
 			}
 			// Colorize the differences in the values
-			c := color.FgRed
+			redColor := color.FgRed
 			offsetsStr1, offsetsStr2, _ := diffArrayRange(string(val1Str), string(val2Str))
-			expectDiff := breakSliceWithColor(string(val1Str), &c, offsetsStr1)
-			c = color.FgGreen
-			actualDiff := breakSliceWithColor(string(val2Str), &c, offsetsStr2)
-			expect.WriteString(breakLines(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, string(expectDiff))))
-			actual.WriteString(breakLines(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, string(actualDiff))))
+			expectDiff := breakSliceWithColor(string(val1Str), &redColor, offsetsStr1)
+			greenColor := color.FgGreen
+			actualDiff := breakSliceWithColor(string(val2Str), &greenColor, offsetsStr2)
+			expect.WriteString(breakLines(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, truncateStringWithEllipsis(string(expectDiff), redColor))))
+			actual.WriteString(breakLines(fmt.Sprintf("%s\"%s\": %s,\n", indent, key, truncateStringWithEllipsis(string(actualDiff), greenColor))))
 			return
 		}
 		// If values are equal, write the value without color
@@ -811,6 +817,135 @@ func truncateToMatchWithEllipsis(expectedText, actualText string) (string, strin
 
 	// Return the truncated versions of the expected and actual texts.
 	return truncatedExpected, truncatedActual
+}
+
+// truncateStringWithEllipsis truncates a string to a specified length, adding an ellipsis if necessary.
+func truncateStringWithEllipsis(val string, c color.Attribute) string {
+	if !ansiRegex.MatchString(val) {
+		return truncatePlain(val, maxCharactersLength, "...")
+	}
+
+	colorEllipsis := color.New(c).Sprint("...")
+
+	type ansiRange struct{ Start, End int }
+	ranges := collectANSISegments(val)
+
+	// NEW: coalesce adjacent runs (or runs separated only by whitespace)
+	coalesced := make([]ansiRange, 0, len(ranges))
+	for _, r := range ranges {
+		if len(coalesced) == 0 {
+			coalesced = append(coalesced, r)
+			continue
+		}
+		last := &coalesced[len(coalesced)-1]
+		gap := val[last.End:r.Start]
+		if strings.TrimSpace(gap) == "" {
+			// merge into one big block (includes the whitespace gap)
+			last.End = r.End
+		} else {
+			coalesced = append(coalesced, r)
+		}
+	}
+
+	var out strings.Builder
+	prev := 0
+	for _, r := range coalesced {
+		out.WriteString(truncatePlain(val[prev:r.Start], maxCharactersLength, "..."))
+		out.WriteString(truncateANSISegment(val[r.Start:r.End], maxCharactersLength, colorEllipsis))
+		prev = r.End
+	}
+	out.WriteString(truncatePlain(val[prev:], maxCharactersLength, "..."))
+	return out.String()
+}
+
+// collectANSISegments collects segments of ANSI escape codes from the input string.
+func collectANSISegments(s string) []struct{ Start, End int } {
+	var res []struct{ Start, End int }
+
+	in := false
+	segStart := 0
+	ms := ansiRegex.FindAllStringIndex(s, -1)
+	for _, m := range ms {
+		code := s[m[0]:m[1]]
+		if !in {
+			if code != ansiResetCode {
+				in = true
+				segStart = m[0]
+			}
+		} else {
+			if code == ansiResetCode {
+				res = append(res, struct{ Start, End int }{Start: segStart, End: m[1]})
+				in = false
+			}
+		}
+	}
+	if in { // unclosed color
+		res = append(res, struct{ Start, End int }{Start: segStart, End: len(s)})
+	}
+	return res
+}
+
+func truncatePlain(s string, limit int, ellipsis string) string {
+	if utf8.RuneCountInString(s) <= limit {
+		return s
+	}
+	cut := byteIndexAfterNRunes(s, limit)
+	return s[:cut] + ellipsis
+}
+
+func truncateANSISegment(seg string, limit int, coloredEllipsis string) string {
+	hasReset := strings.Contains(seg, ansiResetCode)
+	ms := ansiRegex.FindAllStringIndex(seg, -1)
+
+	var b strings.Builder
+	pos, mi, visible := 0, 0, 0
+
+	for pos < len(seg) && visible < limit {
+		if mi < len(ms) && pos == ms[mi][0] {
+			b.WriteString(seg[ms[mi][0]:ms[mi][1]])
+			pos = ms[mi][1]
+			mi++
+			continue
+		}
+		_, sz := utf8.DecodeRuneInString(seg[pos:])
+		b.WriteString(seg[pos : pos+sz])
+		pos += sz
+		visible++
+	}
+
+	if visible >= limit && moreVisibleAhead(seg, pos, ms, mi) {
+		b.WriteString(coloredEllipsis)
+	}
+	if hasReset && !strings.HasSuffix(b.String(), ansiResetCode) {
+		b.WriteString(ansiResetCode)
+	}
+	return b.String()
+}
+
+func moreVisibleAhead(s string, pos int, ms [][]int, mi int) bool {
+	for pos < len(s) {
+		if mi < len(ms) && pos == ms[mi][0] {
+			pos = ms[mi][1]
+			mi++
+			continue
+		}
+		return true
+	}
+	return false
+}
+
+func byteIndexAfterNRunes(s string, n int) int {
+	if n <= 0 {
+		return 0
+	}
+	count := 0
+	for i := range s {
+		if count == n {
+			return i
+		}
+		count++
+	}
+	return len(s)
 }
 
 // compareAndColorizeMaps compares two maps and returns the differences as colorized strings.
