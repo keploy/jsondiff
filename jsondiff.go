@@ -207,8 +207,10 @@ func calculateJSONDiffs(expectedJSON, actualJSON []byte) (string, error) {
 // unquoteKey trims surrounding quotes and spaces from a JSON key safely.
 func unquoteKey(k string) string {
 	k = strings.TrimSpace(k)
-	// Trim both double/single quotes if present.
+	// Trim both double/single quotes if present first.
 	k = strings.Trim(k, `"'`)
+	// Then, trim any remaining whitespace that was inside the quotes.
+	k = strings.TrimSpace(k)
 	return k
 }
 
@@ -519,7 +521,7 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				}
 			}
 
-			if len(strings.SplitN(line[3:], ":", 2)) == 2 {
+			if len(line) > 3 && len(strings.SplitN(line[3:], ":", 2)) == 2 {
 				expectTrimmedLine := line[3:] // Trim the '- ' prefix from the current line.
 				expectkeyValue := strings.SplitN(expectTrimmedLine, ":", 2)
 				expectKey = strings.TrimSpace(expectkeyValue[0])
@@ -778,7 +780,7 @@ func insertEmptyLines(lines []string) []string {
 		result = append(result, lines[i]) // Append the current line to the result slice.
 
 		// Check if the current line and the next line start with the same symbol.
-		if i < len(lines)-1 && lines[i] != "" && lines[i][0] == lines[i+1][0] {
+		if i < len(lines)-1 && lines[i] != "" && lines[i+1] != "" && lines[i][0] == lines[i+1][0] {
 			result = append(result, "") // Insert an empty line between consecutive elements with the same symbol.
 		}
 	}
