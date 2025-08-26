@@ -868,3 +868,92 @@ func wrapTextWithAnsi(input string) string {
 	// Return the processed string with properly wrapped ANSI escape sequences.
 	return wrappedBuilder.String()
 }
+
+func TestExtractKey(t *testing.T) {
+	tests := []struct {
+		name         string
+		inputDiff    string
+		expectedKeys string
+	}{
+		{
+			name:         "Standard case with plus and minus",
+			inputDiff:    "- \"name\": \"Cat\"\n+ \"name\": \"Dog\"",
+			expectedKeys: "name|name",
+		},
+		{
+			name:         "Keys with single and double quotes",
+			inputDiff:    `- 'id': 123` + "\n" + `+ "id": 456`,
+			expectedKeys: "id|id",
+		},
+		{
+			name:         "Handles empty lines between diffs",
+			inputDiff:    "- \"key1\": \"val1\"\n\n+ \"key1\": \"val2\"",
+			expectedKeys: "key1|key1",
+		},
+		{
+			name:         "Handles leading and trailing empty lines",
+			inputDiff:    "\n- \"key1\": \"val1\"\n+ \"key1\": \"val2\"\n",
+			expectedKeys: "key1|key1",
+		},
+		{
+			name:         "Empty input string",
+			inputDiff:    "",
+			expectedKeys: "",
+		},
+		{
+			name:         "Input with only whitespace and newlines",
+			inputDiff:    " \n \n ",
+			expectedKeys: "",
+		},
+		{
+			name:         "Malformed line without a colon",
+			inputDiff:    "- \"key1\" \"val1\"",
+			expectedKeys: "",
+		},
+		{
+			name:         "Line with only a plus or minus sign",
+			inputDiff:    "-\n+",
+			expectedKeys: "",
+		},
+		{
+			name:         "Mixed valid and invalid lines",
+			inputDiff:    "- \"validKey1\": 1\n- malformed\n+ \"validKey2\": 2",
+			expectedKeys: "validKey1|validKey2",
+		},
+		{
+			name:         "Key with extra whitespace",
+			inputDiff:    `-  "  spaced key  "  : "value"`,
+			expectedKeys: "spaced key",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := extractKey(tt.inputDiff)
+			if got != tt.expectedKeys {
+				t.Errorf("extractKey() = %v, want %v", got, tt.expectedKeys)
+			}
+		})
+	}
+}
+
+func FuzzCompareJSON(f *testing.F) {
+	// Add some seed inputs to give the fuzzer a starting point.
+	f.Add(`{"id": 1}`, `{"id": 2}`)
+	f.Add(`{"a": "b"}`, `{}`)
+	f.Add(`[]`, `{}`)
+	f.Add(`"a"`, `"b"`)
+	f.Add(`- "key": val`, `+ "key": val`) // Seed for extractKey
+
+	// The fuzzer will now generate random strings and run them through your functions.
+	f.Fuzz(func(t *testing.T, json1 string, json2 string) {
+		// We only care if these functions panic. We don't need to check the output.
+		// A panic will automatically fail the test.
+
+		// Fuzz the main function
+		_, _ = CompareJSON([]byte(json1), []byte(json2), nil, false)
+
+		// Fuzz the function that was originally panicking
+		_ = extractKey(json1)
+	})
+}

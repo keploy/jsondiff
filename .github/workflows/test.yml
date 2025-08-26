@@ -11,14 +11,26 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Tests
+  unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-        - uses: actions/checkout@v3
-        - uses: actions/setup-go@v4
-          with:
-            go-version: '1.22'
-            cache: false
-        - name: Run tests
-          run: go test -v ./...
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+          cache: true
+      - name: Run unit tests
+        run: go test -v ./...
+
+  fuzz-tests:
+    name: Fuzz Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+          cache: true
+      - name: Run fuzz tests
+        run: go test -fuzz=FuzzCompareJSON -fuzztime=240s ./...

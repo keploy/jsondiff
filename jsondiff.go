@@ -204,27 +204,50 @@ func calculateJSONDiffs(expectedJSON, actualJSON []byte) (string, error) {
 	return strings.Join(diffs, "\n"), nil
 }
 
+// unquoteKey trims surrounding quotes and spaces from a JSON key safely.
+func unquoteKey(k string) string {
+	k = strings.TrimSpace(k)
+	// Trim both double/single quotes if present first.
+	k = strings.Trim(k, `"'`)
+	// Then, trim any remaining whitespace that was inside the quotes.
+	k = strings.TrimSpace(k)
+	return k
+}
+
 // extractKey extracts the keys from the diff string.
-// diffString: The input string representing the differences.
-// Returns a string containing all the keys separated by a pipe character.
+// Handles empty lines and lines that don't start with +/- safely.
 func extractKey(diffString string) string {
-	diffLines := strings.Split(diffString, "\n") // Split the diff string into lines.
+	diffLines := strings.Split(diffString, "\n")
 	var keys []string
 
-	// Iterate over each line in the diff string.
-	for _, line := range diffLines {
-		// Remove the leading '-' or '+' and any surrounding spaces
-		line = strings.TrimSpace(line[1:])
+	for _, raw := range diffLines {
+		line := strings.TrimSpace(raw)
+		if line == "" {
+			continue
+		}
 
-		if colonIndex := strings.Index(line, ":"); colonIndex != -1 {
-			// Extract and clean up the key
-			key := strings.Trim(line[:colonIndex], `"'`)
+		// Remove a single leading +/- if present.
+		if line[0] == '-' || line[0] == '+' {
+			// If it's exactly "-" or "+", skip.
+			if len(line) == 1 {
+				continue
+			}
+			line = strings.TrimSpace(line[1:])
+			if line == "" {
+				continue
+			}
+		}
+
+		// Expect `<key>: <value>`; split once.
+		parts := strings.SplitN(line, ":", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		key := unquoteKey(parts[0])
+		if key != "" {
 			keys = append(keys, key)
 		}
-		// Add the key to the list of keys.
 	}
-
-	// Join the keys into a single string separated by a pipe character.
 	return strings.Join(keys, "|")
 }
 
@@ -484,30 +507,33 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 				actualTrimmedLine := nextLine[3:] // Trim the '+ ' prefix from the next line.
 				actualKeyValue := strings.SplitN(actualTrimmedLine, ":", 2)
 				actualKey = strings.TrimSpace(actualKeyValue[0])
+				cleanActualKey := unquoteKey(actualKey)
 				// Process the value
 				value := strings.TrimSpace(actualKeyValue[1])
 				var jsonObj map[string]interface{}
 				switch {
 				case json.Unmarshal([]byte(value), &jsonObj) == nil:
 					isActualMap = true
-					actualMap = map[string]interface{}{actualKey[:len(actualKey)-1]: jsonObj}
+					actualMap = map[string]interface{}{cleanActualKey: jsonObj}
 				case json.Unmarshal([]byte(value), &actualsArray) == nil:
 				default:
 					actualValue = value
 				}
 			}
 
-			if len(strings.SplitN(line[3:], ":", 2)) == 2 {
+			if len(line) > 3 && len(strings.SplitN(line[3:], ":", 2)) == 2 {
 				expectTrimmedLine := line[3:] // Trim the '- ' prefix from the current line.
 				expectkeyValue := strings.SplitN(expectTrimmedLine, ":", 2)
 				expectKey = strings.TrimSpace(expectkeyValue[0])
+				cleanExpectKey := unquoteKey(expectKey)
 				// Process the value
 				value := strings.TrimSpace(expectkeyValue[1])
 				var jsonObj map[string]interface{}
 				switch {
 				case json.Unmarshal([]byte(value), &jsonObj) == nil:
 					isExpectMap = true
-					expectMap = map[string]interface{}{expectKey[:len(expectKey)-1]: jsonObj}
+					expectMap = map[string]interface{}{cleanExpectKey: jsonObj}
+
 				case json.Unmarshal([]byte(value), &expectsArray) == nil:
 				default:
 					expectValue = value
@@ -523,19 +549,23 @@ func separateAndColorize(diffStr string, noise map[string][]string) (string, str
 
 			if expectValue != nil && actualValue != nil {
 				var expectBuilder, actualBuilder strings.Builder
-				if expectKey != actualKey {
-					actualBuilder.WriteString(fmt.Sprintf("%s: %s\n", green(serialize(actualKey[:len(actualKey)-1])), actualValue))
-					expectBuilder.WriteString(fmt.Sprintf("%s: %s\n", red(serialize(expectKey[:len(expectKey)-1])), expectValue))
+				eKey := unquoteKey(expectKey)
+				aKey := unquoteKey(actualKey)
+				if eKey != aKey {
+					actualBuilder.WriteString(fmt.Sprintf("%s: %s\n", green(serialize(aKey)), actualValue))
+					expectBuilder.WriteString(fmt.Sprintf("%s: %s\n", red(serialize(eKey)), expectValue))
 				} else {
-					compare(expectKey[:len(expectKey)-1], expectValue, actualValue, " ", &expectBuilder, &actualBuilder, red, green, intialJsonPath, noise)
+					compare(eKey, expectValue, actualValue, " ", &expectBuilder, &actualBuilder, red, green, intialJsonPath, noise)
 				}
 				expectedText = expectBuilder.String()
 				actualText = actualBuilder.String()
 			} else if !isExpectMap || !isActualMap {
-				if actualKey != expectKey {
+				eKey := unquoteKey(expectKey)
+				aKey := unquoteKey(actualKey)
+				if aKey != eKey {
 					continue
 				}
-				isNoised := checkNoise(actualKey, noise)
+				isNoised := checkNoise(aKey, noise)
 				if isNoised {
 					continue
 				}
@@ -750,7 +780,7 @@ func insertEmptyLines(lines []string) []string {
 		result = append(result, lines[i]) // Append the current line to the result slice.
 
 		// Check if the current line and the next line start with the same symbol.
-		if i < len(lines)-1 && lines[i] != "" && lines[i][0] == lines[i+1][0] {
+		if i < len(lines)-1 && lines[i] != "" && lines[i+1] != "" && lines[i][0] == lines[i+1][0] {
 			result = append(result, "") // Insert an empty line between consecutive elements with the same symbol.
 		}
 	}
