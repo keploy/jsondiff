@@ -142,8 +142,16 @@ func checkKeyInMaps(expectedJSONMap, actualJSONMap []byte, targetKey string) (st
 		return "", false, err
 	}
 
-	// Iterate over the key-value pairs in the expected map.
-	for key, expectedValue := range expectedMap {
+	// Walk the keys in sorted order so the same input always picks the same
+	// context key. Go randomises map iteration, and several keys can match.
+	keys := make([]string, 0, len(expectedMap))
+	for key := range expectedMap {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		expectedValue := expectedMap[key]
 		// Check if the key exists in the actual map, is not part of the provided key string, and values are deeply equal.
 		if actualValue, exists := actualMap[key]; exists && !strings.Contains(targetKey, key) && reflect.DeepEqual(expectedValue, actualValue) {
 			return fmt.Sprintf("%v:%v", key, expectedValue), true, nil

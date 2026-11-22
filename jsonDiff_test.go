@@ -957,3 +957,24 @@ func FuzzCompareJSON(f *testing.F) {
 		_ = extractKey(json1)
 	})
 }
+
+// TestCompareJSONIsDeterministic checks that several keys sharing the same
+// value in both bodies do not make the context line change from run to run.
+func TestCompareJSONIsDeterministic(t *testing.T) {
+	expected := []byte(`{"id":1,"name":"n","type":"t","status":"ok","value":1}`)
+	actual := []byte(`{"id":1,"name":"n","type":"t","status":"ok","value":2}`)
+
+	first, err := CompareJSON(expected, actual, nil, true)
+	if err != nil {
+		t.Fatalf("CompareJSON returned an error: %v", err)
+	}
+	for i := 0; i < 100; i++ {
+		got, err := CompareJSON(expected, actual, nil, true)
+		if err != nil {
+			t.Fatalf("CompareJSON returned an error: %v", err)
+		}
+		if got != first {
+			t.Fatalf("run %d differs from the first run\nfirst: %q / %q\n got:  %q / %q", i, first.Expected, first.Actual, got.Expected, got.Actual)
+		}
+	}
+}
